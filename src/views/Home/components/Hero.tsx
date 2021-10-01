@@ -104,7 +104,7 @@ const Hero = () => {
       >
         <Flex flex="1" flexDirection="column">
           <Heading scale="xxl" color="secondary" mb="24px">
-            {t('No Loss Jackpot By LovePot.')}
+            {t('The moon is made of GS.')}
           </Heading>
           <Heading scale="md" mb="24px">
             {t('Make good earning crypto safely and securely on out decentralized finance platform by Staking in Pool, Farm and Jackpot.')}
