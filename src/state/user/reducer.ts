@@ -1,33 +1,23 @@
 import { createReducer } from '@reduxjs/toolkit'
-import { SerializedToken } from 'config/constants/types'
-import { DEFAULT_DEADLINE_FROM_NOW, INITIAL_ALLOWED_SLIPPAGE } from '../../config/constants'
+import { INITIAL_ALLOWED_SLIPPAGE, DEFAULT_DEADLINE_FROM_NOW } from '../../config/constants'
 import { updateVersion } from '../global/actions'
 import {
   addSerializedPair,
   addSerializedToken,
-  addWatchlistPool,
-  addWatchlistToken,
-  FarmStakedOnly,
   removeSerializedPair,
   removeSerializedToken,
   SerializedPair,
-  muteAudio,
-  toggleTheme,
-  unmuteAudio,
-  updateGasPrice,
-  updateUserDeadline,
+  SerializedToken,
   updateUserExpertMode,
-  updateUserFarmStakedOnly,
-  updateUserFarmsViewMode,
-  updateUserPoolStakedOnly,
-  updateUserPoolsViewMode,
-  updateUserSingleHopOnly,
   updateUserSlippageTolerance,
-  ViewMode,
-  updateUserPredictionAcceptedRisk,
-  updateUserPredictionChartDisclaimerShow,
-  updateUserUsernameVisibility,
-  updateUserExpertModeAcknowledgementShow,
+  updateUserDeadline,
+  updateUserSingleHopOnly,
+  updateGasPrice,
+  muteAudio,
+  unmuteAudio,
+  toggleTheme,
+  updateUserFarmStakedOnly,
+  FarmStakedOnly,
 } from './actions'
 import { GAS_PRICE_GWEI } from './hooks/helpers'
 
@@ -65,16 +55,7 @@ export interface UserState {
   audioPlay: boolean
   isDark: boolean
   userFarmStakedOnly: FarmStakedOnly
-  userPoolStakedOnly: boolean
-  userPoolsViewMode: ViewMode
-  userFarmsViewMode: ViewMode
-  userPredictionAcceptedRisk: boolean
-  userPredictionChartDisclaimerShow: boolean
-  userExpertModeAcknowledgementShow: boolean
-  userUsernameVisibility: boolean
   gasPrice: string
-  watchlistTokens: string[]
-  watchlistPools: string[]
 }
 
 function pairKey(token0Address: string, token1Address: string) {
@@ -92,16 +73,7 @@ export const initialState: UserState = {
   audioPlay: true,
   isDark: false,
   userFarmStakedOnly: FarmStakedOnly.ON_FINISHED,
-  userPoolStakedOnly: false,
-  userPoolsViewMode: ViewMode.TABLE,
-  userFarmsViewMode: ViewMode.TABLE,
-  userPredictionAcceptedRisk: false,
-  userPredictionChartDisclaimerShow: true,
-  userExpertModeAcknowledgementShow: true,
-  userUsernameVisibility: false,
   gasPrice: GAS_PRICE_GWEI.default,
-  watchlistTokens: [],
-  watchlistPools: [],
 }
 
 export default createReducer(initialState, (builder) =>
@@ -183,50 +155,7 @@ export default createReducer(initialState, (builder) =>
     .addCase(updateUserFarmStakedOnly, (state, { payload: { userFarmStakedOnly } }) => {
       state.userFarmStakedOnly = userFarmStakedOnly
     })
-    .addCase(updateUserPoolStakedOnly, (state, { payload: { userPoolStakedOnly } }) => {
-      state.userPoolStakedOnly = userPoolStakedOnly
-    })
-    .addCase(updateUserPoolsViewMode, (state, { payload: { userPoolsViewMode } }) => {
-      state.userPoolsViewMode = userPoolsViewMode
-    })
-    .addCase(updateUserFarmsViewMode, (state, { payload: { userFarmsViewMode } }) => {
-      state.userFarmsViewMode = userFarmsViewMode
-    })
-    .addCase(updateUserPredictionAcceptedRisk, (state, { payload: { userAcceptedRisk } }) => {
-      state.userPredictionAcceptedRisk = userAcceptedRisk
-    })
-    .addCase(updateUserPredictionChartDisclaimerShow, (state, { payload: { userShowDisclaimer } }) => {
-      state.userPredictionChartDisclaimerShow = userShowDisclaimer
-    })
-    .addCase(updateUserExpertModeAcknowledgementShow, (state, { payload: { userExpertModeAcknowledgementShow } }) => {
-      state.userExpertModeAcknowledgementShow = userExpertModeAcknowledgementShow
-    })
-    .addCase(updateUserUsernameVisibility, (state, { payload: { userUsernameVisibility } }) => {
-      state.userUsernameVisibility = userUsernameVisibility
-    })
     .addCase(updateGasPrice, (state, action) => {
       state.gasPrice = action.payload.gasPrice
-    })
-    .addCase(addWatchlistToken, (state, { payload: { address } }) => {
-      // state.watchlistTokens can be undefined for pre-loaded localstorage user state
-      const tokenWatchlist = state.watchlistTokens ?? []
-      if (!tokenWatchlist.includes(address)) {
-        state.watchlistTokens = [...tokenWatchlist, address]
-      } else {
-        // Remove token from watchlist
-        const newTokens = state.watchlistTokens.filter((x) => x !== address)
-        state.watchlistTokens = newTokens
-      }
-    })
-    .addCase(addWatchlistPool, (state, { payload: { address } }) => {
-      // state.watchlistPools can be undefined for pre-loaded localstorage user state
-      const poolsWatchlist = state.watchlistPools ?? []
-      if (!poolsWatchlist.includes(address)) {
-        state.watchlistPools = [...poolsWatchlist, address]
-      } else {
-        // Remove pool from watchlist
-        const newPools = state.watchlistPools.filter((x) => x !== address)
-        state.watchlistPools = newPools
-      }
     }),
 )

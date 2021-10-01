@@ -1,17 +1,17 @@
 import { SalesSectionProps } from '.'
 
 export const swapSectionData: SalesSectionProps = {
-  headingText: 'Trade anything. No registration, no hassle.',
-  bodyText: 'Trade any token on Binance Smart Chain in seconds, just by connecting your wallet.',
+  headingText: 'LOVEpowers the LovePot ecosystem',
+  bodyText: 'Buy it, earn it, stake it.',
   reverse: false,
   primaryButton: {
     to: '/swap',
-    text: 'Trade Now',
+    text: 'Buy LOVE',
     external: false,
   },
   secondaryButton: {
     to: 'https://docs.pancakeswap.finance/',
-    text: 'Learn',
+    text: 'Learn More',
     external: true,
   },
   images: {
@@ -49,28 +49,23 @@ export const earnSectionData: SalesSectionProps = {
 }
 
 export const cakeSectionData: SalesSectionProps = {
-  headingText: 'CAKE makes our world go round.',
-  bodyText:
-    'CAKE token is at the heart of the PancakeSwap ecosystem. Buy it, win it, farm it, spend it, stake it... heck, you can even vote with it!',
+  headingText: 'LOVE powers the LovePot ecosystem',
+  bodyText: 'Buy it, earn it, stake it.',
   reverse: false,
   primaryButton: {
     to: '/swap?outputCurrency=0x0e09fabb73bd3ade0a17ecc321fd13a19e81ce82',
-    text: 'Buy CAKE',
+    text: 'Buy LOVE',
     external: false,
   },
   secondaryButton: {
     to: 'https://docs.pancakeswap.finance/tokenomics/cake',
-    text: 'Learn',
+    text: 'Learn More',
     external: true,
   },
-
   images: {
     path: '/images/home/cake/',
     attributes: [
-      { src: 'bottom-right', alt: 'Small 3d pancake' },
-      { src: 'top-right', alt: 'Small 3d pancake' },
-      { src: 'coin', alt: 'CAKE token' },
-      { src: 'top-left', alt: 'Small 3d pancake' },
+      { src: 'coin', alt: 'LOVE token' },
     ],
   },
 }

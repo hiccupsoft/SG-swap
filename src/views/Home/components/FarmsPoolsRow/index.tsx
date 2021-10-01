@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react'
 import styled from 'styled-components'
 import { Flex, Box, SwapVertIcon, IconButton } from '@pancakeswap/uikit'
 import { useTranslation } from 'contexts/Localization'
-import { DeserializedPool } from 'state/types'
+import { Pool } from 'state/types'
 import useIntersectionObserver from 'hooks/useIntersectionObserver'
 import useGetTopFarmsByApr from 'views/Home/hooks/useGetTopFarmsByApr'
 import useGetTopPoolsByApr from 'views/Home/hooks/useGetTopPoolsByApr'
@@ -49,13 +49,13 @@ const FarmsPoolsRow = () => {
     }
   }, [timer, isLoaded, startTimer])
 
-  const getPoolText = (pool: DeserializedPool) => {
+  const getPoolText = (pool: Pool) => {
     if (pool.isAutoVault) {
-      return t('Auto CAKE')
+      return t('Auto LOT')
     }
 
     if (pool.sousId === 0) {
-      return t('Manual CAKE')
+      return t('Manual LOT')
     }
 
     return t('Stake %stakingSymbol% - Earn %earningSymbol%', {

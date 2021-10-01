@@ -19,7 +19,7 @@ import {
 import { BASE_BSC_SCAN_URL } from 'config'
 import { useBlock } from 'state/block/hooks'
 import { useCakeVault } from 'state/pools/hooks'
-import { DeserializedPool } from 'state/types'
+import { Pool } from 'state/types'
 import { getAddress, getCakeVaultAddress } from 'utils/addressHelpers'
 import { registerToken } from 'utils/wallet'
 import { getBscScanLink } from 'utils'
@@ -27,7 +27,7 @@ import Balance from 'components/Balance'
 import { getPoolBlockInfo } from 'views/Pools/helpers'
 
 interface ExpandedFooterProps {
-  pool: DeserializedPool
+  pool: Pool
   account: string
 }
 
@@ -58,7 +58,7 @@ const ExpandedFooter: React.FC<ExpandedFooterProps> = ({ pool, account }) => {
     isAutoVault,
   } = pool
 
-  const tokenAddress = earningToken.address || ''
+  const tokenAddress = earningToken.address ? getAddress(earningToken.address) : ''
   const poolContractAddress = getAddress(contractAddress)
   const cakeVaultContractAddress = getCakeVaultAddress()
   const isMetaMaskInScope = !!window.ethereum?.isMetaMask
@@ -140,18 +140,14 @@ const ExpandedFooter: React.FC<ExpandedFooterProps> = ({ pool, account }) => {
             {t('Performance Fee')}
           </TooltipText>
           <Flex alignItems="center">
-            {performanceFee ? (
-              <Text ml="4px" small>
-                {performanceFee / 100}%
-              </Text>
-            ) : (
-              <Skeleton width="90px" height="21px" />
-            )}
+            <Text ml="4px" small>
+              {performanceFee / 100}%
+            </Text>
           </Flex>
         </Flex>
       )}
       <Flex mb="2px" justifyContent="flex-end">
-        <LinkExternal href={`/info/token/${earningToken.address}`} bold={false} small>
+        <LinkExternal href={`https://lovepot.floki-coin.io/token/${getAddress(earningToken.address)}`} bold={false} small>
           {t('See Token Info')}
         </LinkExternal>
       </Flex>

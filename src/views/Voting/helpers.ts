@@ -1,11 +1,13 @@
+import BigNumber from 'bignumber.js'
+import { getCakeAddress } from 'utils/addressHelpers'
 import { SNAPSHOT_HUB_API, SNAPSHOT_VOTING_API } from 'config/constants/endpoints'
-import tokens from 'config/constants/tokens'
+import { BIG_ZERO } from 'utils/bigNumber'
 import { Proposal, ProposalState, ProposalType, Vote } from 'state/types'
 import { simpleRpcProvider } from 'utils/providers'
-import { ADMINS, PANCAKE_SPACE, SNAPSHOT_VERSION } from './config'
+import { ADMIN_ADDRESS, PANCAKE_SPACE, SNAPSHOT_VERSION } from './config'
 
 export const isCoreProposal = (proposal: Proposal) => {
-  return ADMINS.includes(proposal.author.toLowerCase())
+  return proposal.author.toLowerCase() === ADMIN_ADDRESS.toLowerCase()
 }
 
 export const filterProposalsByType = (proposals: Proposal[], proposalType: ProposalType) => {
@@ -37,7 +39,7 @@ export const generateMetaData = () => {
   return {
     plugins: {},
     network: 56,
-    strategies: [{ name: 'cake', params: { symbol: 'CAKE', address: tokens.cake.address, decimals: 18 } }],
+    strategies: [{ name: 'cake', params: { symbol: 'CAKE', address: getCakeAddress(), decimals: 18 } }],
   }
 }
 
@@ -104,7 +106,7 @@ export const calculateVoteResults = (votes: Vote[]): { [key: string]: Vote[] } =
 
 export const getTotalFromVotes = (votes: Vote[]) => {
   return votes.reduce((accum, vote) => {
-    const power = parseFloat(vote.metadata?.votingPower)
-    return accum + power
-  }, 0)
+    const power = new BigNumber(vote.metadata?.votingPower)
+    return accum.plus(power)
+  }, BIG_ZERO)
 }

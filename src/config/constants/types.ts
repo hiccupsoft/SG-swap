@@ -1,26 +1,17 @@
 import BigNumber from 'bignumber.js'
-import { Token } from '@pancakeswap/sdk'
+import { SerializedBigNumber, TranslatableText } from 'state/types'
 
-export type TranslatableText =
-  | string
-  | {
-      key: string
-      data?: {
-        [key: string]: string | number
-      }
-    }
 export interface Address {
   97?: string
   56: string
 }
 
-export interface SerializedToken {
-  chainId: number
-  address: string
-  decimals: number
-  symbol?: string
-  name?: string
+export interface Token {
+  symbol: string
+  address?: Address
+  decimals?: number
   projectLink?: string
+  busdPrice?: string
 }
 
 export enum PoolIds {
@@ -60,10 +51,12 @@ export enum PoolCategory {
   'AUTO' = 'Auto',
 }
 
-interface FarmConfigBaseProps {
+export interface FarmConfig {
   pid: number
   lpSymbol: string
   lpAddresses: Address
+  token: Token
+  quoteToken: Token
   multiplier?: string
   isCommunity?: boolean
   dual?: {
@@ -73,18 +66,10 @@ interface FarmConfigBaseProps {
   }
 }
 
-export interface SerializedFarmConfig extends FarmConfigBaseProps {
-  token: SerializedToken
-  quoteToken: SerializedToken
-}
-
-export interface DeserializedFarmConfig extends FarmConfigBaseProps {
-  token: Token
-  quoteToken: Token
-}
-
-interface PoolConfigBaseProps {
+export interface PoolConfig {
   sousId: number
+  earningToken: Token
+  stakingToken: Token
   contractAddress: Address
   poolCategory: PoolCategory
   tokenPerBlock: string
@@ -94,21 +79,48 @@ interface PoolConfigBaseProps {
   enableEmergencyWithdraw?: boolean
 }
 
-export interface SerializedPoolConfig extends PoolConfigBaseProps {
-  earningToken: SerializedToken
-  stakingToken: SerializedToken
-}
-
-export interface DeserializedPoolConfig extends PoolConfigBaseProps {
-  earningToken: Token
-  stakingToken: Token
-}
-
 export type Images = {
   lg: string
   md: string
   sm: string
   ipfs?: string
+}
+
+export type NftImages = {
+  blur?: string
+} & Images
+
+export type NftVideo = {
+  webm: string
+  mp4: string
+}
+
+export type NftSource = {
+  [key in NftType]: {
+    address: Address
+    identifierKey: string
+  }
+}
+
+export enum NftType {
+  PANCAKE = 'pancake',
+  MIXIE = 'mixie',
+}
+
+export type Nft = {
+  description: string
+  name: string
+  images: NftImages
+  sortOrder: number
+  type: NftType
+  video?: NftVideo
+
+  // Uniquely identifies the nft.
+  // Used for matching an NFT from the config with the data from the NFT's tokenURI
+  identifier: string
+
+  // Used to be "bunnyId". Used when minting NFT
+  variationId?: number | string
 }
 
 export type TeamImages = {
@@ -156,7 +168,7 @@ export interface LotteryTicket {
   status: boolean
   rewardBracket?: number
   roundId?: string
-  cakeReward?: string
+  cakeReward?: SerializedBigNumber
 }
 
 export interface LotteryTicketClaimData {
@@ -195,6 +207,10 @@ export interface Auction {
   endBlock: number
   endDate: Date
   auctionDuration: number
+  farmStartBlock: number
+  farmStartDate: Date
+  farmEndBlock: number
+  farmEndDate: Date
   initialBidAmount: number
   topLeaderboard: number
   leaderboardThreshold: BigNumber

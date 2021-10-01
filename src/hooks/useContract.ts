@@ -25,8 +25,6 @@ import {
   getBunnySpecialPredictionContract,
   getFarmAuctionContract,
   getBunnySpecialLotteryContract,
-  getAnniversaryAchievementContract,
-  getNftMarketContract,
 } from 'utils/contractHelpers'
 import { getMulticallAddress } from 'utils/addressHelpers'
 
@@ -164,11 +162,6 @@ export const useBunnySpecialLotteryContract = () => {
   return useMemo(() => getBunnySpecialLotteryContract(library.getSigner()), [library])
 }
 
-export const useAnniversaryAchievementContract = () => {
-  const { library } = useActiveWeb3React()
-  return useMemo(() => getAnniversaryAchievementContract(library.getSigner()), [library])
-}
-
 export const useFarmAuctionContract = () => {
   const { account, library } = useActiveWeb3React()
   // This hook is slightly different from others
@@ -183,11 +176,6 @@ export const useFarmAuctionContract = () => {
   //
   // Similar behavior was also noticed on Trading Competition page.
   return useMemo(() => getFarmAuctionContract(account ? library.getSigner() : library), [library, account])
-}
-
-export const useNftMarketContract = () => {
-  const { library } = useActiveWeb3React()
-  return useMemo(() => getNftMarketContract(library.getSigner()), [library])
 }
 
 // Code below migrated from Exchange useContract.ts

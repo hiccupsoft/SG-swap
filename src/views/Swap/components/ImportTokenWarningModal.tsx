@@ -2,7 +2,6 @@ import React from 'react'
 import { Token } from '@pancakeswap/sdk'
 import { Modal, InjectedModalProps } from '@pancakeswap/uikit'
 import ImportToken from 'components/SearchModal/ImportToken'
-import { useTranslation } from 'contexts/Localization'
 
 interface Props extends InjectedModalProps {
   tokens: Token[]
@@ -10,10 +9,9 @@ interface Props extends InjectedModalProps {
 }
 
 const ImportTokenWarningModal: React.FC<Props> = ({ tokens, onDismiss, onCancel }) => {
-  const { t } = useTranslation()
   return (
     <Modal
-      title={t('Import Token')}
+      title="Import Token"
       onDismiss={() => {
         if (onDismiss) {
           onDismiss()

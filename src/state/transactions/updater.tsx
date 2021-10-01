@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Text, Flex, Link } from '@pancakeswap/uikit'
-import { useTranslation } from 'contexts/Localization'
 import useActiveWeb3React from 'hooks/useActiveWeb3React'
 import { getBscScanLink } from 'utils'
 import { useBlock } from 'state/block/hooks'
@@ -32,7 +31,6 @@ export function shouldCheck(
 
 export default function Updater(): null {
   const { library, chainId } = useActiveWeb3React()
-  const { t } = useTranslation()
 
   const { currentBlock } = useBlock()
 
@@ -72,12 +70,12 @@ export default function Updater(): null {
 
               const toast = receipt.status === 1 ? toastSuccess : toastError
               toast(
-                t('Transaction receipt'),
+                'Transaction receipt',
                 <Flex flexDirection="column">
                   <Text>{transactions[hash]?.summary ?? `Hash: ${hash.slice(0, 8)}...${hash.slice(58, 65)}`}</Text>
                   {chainId && (
                     <Link external href={getBscScanLink(hash, 'transaction', chainId)}>
-                      {t('View on BscScan')}
+                      View on BscScan
                     </Link>
                   )}
                 </Flex>,
@@ -90,7 +88,7 @@ export default function Updater(): null {
             console.error(`failed to check transaction hash: ${hash}`, error)
           })
       })
-  }, [chainId, library, transactions, currentBlock, dispatch, toastSuccess, toastError, t])
+  }, [chainId, library, transactions, currentBlock, dispatch, toastSuccess, toastError])
 
   return null
 }

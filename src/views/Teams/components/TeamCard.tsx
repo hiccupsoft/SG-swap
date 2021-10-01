@@ -3,8 +3,8 @@ import styled from 'styled-components'
 import { Card, CardHeader, CardBody, CommunityIcon, Heading, PrizeIcon, Text } from '@pancakeswap/uikit'
 import { Team } from 'config/constants/types'
 import { useTranslation } from 'contexts/Localization'
-import ComingSoon from './ComingSoon'
-import IconStatBox from './IconStatBox'
+import ComingSoon from 'views/Profile/components/ComingSoon'
+import StatBox from 'views/Profile/components/StatBox'
 
 interface TeamCardProps {
   team: Team
@@ -89,8 +89,8 @@ const TeamCard: React.FC<TeamCardProps> = ({ team }) => {
         </StyledCardHeader>
         <CardBody>
           <StatRow>
-            <IconStatBox icon={CommunityIcon} title={team.users} subtitle={t('Active Members')} />
-            <IconStatBox icon={PrizeIcon} title={t('Coming Soon')} subtitle={t('Team Points')} isDisabled />
+            <StatBox icon={CommunityIcon} title={team.users} subtitle={t('Active Members')} />
+            <StatBox icon={PrizeIcon} title={t('Coming Soon')} subtitle={t('Team Points')} isDisabled />
           </StatRow>
           <Heading as="h3">{t('Team Achievements')}</Heading>
           <ComingSoon />

@@ -4,8 +4,9 @@ import { Flex, TooltipText, IconButton, useModal, CalculateIcon, Skeleton, useTo
 import { useTranslation } from 'contexts/Localization'
 import Balance from 'components/Balance'
 import RoiCalculatorModal from 'components/RoiCalculatorModal'
-import { DeserializedPool } from 'state/types'
+import { Pool } from 'state/types'
 import { getAprData } from 'views/Pools/helpers'
+import { getAddress } from 'utils/addressHelpers'
 import BigNumber from 'bignumber.js'
 import { BIG_ZERO } from 'utils/bigNumber'
 
@@ -18,7 +19,7 @@ const ApyLabelContainer = styled(Flex)`
 `
 
 interface AprRowProps {
-  pool: DeserializedPool
+  pool: Pool
   stakedBalance: BigNumber
   performanceFee?: number
 }
@@ -38,7 +39,7 @@ const AprRow: React.FC<AprRowProps> = ({ pool, stakedBalance, performanceFee = 0
 
   const { apr: earningsPercentageToDisplay, autoCompoundFrequency } = getAprData(pool, performanceFee)
 
-  const apyModalLink = stakingToken.address ? `/swap?outputCurrency=${stakingToken.address}` : '/swap'
+  const apyModalLink = stakingToken.address ? `/swap?outputCurrency=${getAddress(stakingToken.address)}` : '/swap'
 
   const [onPresentApyModal] = useModal(
     <RoiCalculatorModal

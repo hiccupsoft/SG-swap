@@ -1,5 +1,12 @@
 import { createAction } from '@reduxjs/toolkit'
-import { SerializedToken } from 'config/constants/types'
+
+export interface SerializedToken {
+  chainId: number
+  address: string
+  decimals: number
+  symbol?: string
+  name?: string
+}
 
 export interface SerializedPair {
   token0: SerializedToken
@@ -10,11 +17,6 @@ export enum FarmStakedOnly {
   ON_FINISHED = 'onFinished',
   TRUE = 'true',
   FALSE = 'false',
-}
-
-export enum ViewMode {
-  TABLE = 'TABLE',
-  CARD = 'CARD',
 }
 
 export const updateUserExpertMode = createAction<{ userExpertMode: boolean }>('user/updateUserExpertMode')
@@ -35,22 +37,4 @@ export const toggleTheme = createAction<void>('user/toggleTheme')
 export const updateUserFarmStakedOnly = createAction<{ userFarmStakedOnly: FarmStakedOnly }>(
   'user/updateUserFarmStakedOnly',
 )
-export const updateUserPoolStakedOnly = createAction<{ userPoolStakedOnly: boolean }>('user/updateUserPoolStakedOnly')
-export const updateUserPoolsViewMode = createAction<{ userPoolsViewMode: ViewMode }>('user/updateUserPoolsViewMode')
-export const updateUserFarmsViewMode = createAction<{ userFarmsViewMode: ViewMode }>('user/updateUserFarmsViewMode')
-export const updateUserPredictionAcceptedRisk = createAction<{ userAcceptedRisk: boolean }>(
-  'user/updateUserPredictionAcceptedRisk',
-)
-export const updateUserPredictionChartDisclaimerShow = createAction<{ userShowDisclaimer: boolean }>(
-  'user/updateUserPredictionChartDisclaimerShow',
-)
-export const updateUserExpertModeAcknowledgementShow = createAction<{ userExpertModeAcknowledgementShow: boolean }>(
-  'user/updateUserExpertModeAcknowledgementShow',
-)
-export const updateUserUsernameVisibility = createAction<{ userUsernameVisibility: boolean }>(
-  'user/updateUserUsernameVisibility',
-)
 export const updateGasPrice = createAction<{ gasPrice: string }>('user/updateGasPrice')
-
-export const addWatchlistToken = createAction<{ address: string }>('user/addWatchlistToken')
-export const addWatchlistPool = createAction<{ address: string }>('user/addWatchlistPool')

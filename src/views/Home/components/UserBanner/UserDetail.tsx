@@ -3,7 +3,7 @@ import { NoProfileAvatarIcon, Flex, Heading, Skeleton, Text, Box } from '@pancak
 import { useWeb3React } from '@web3-react/core'
 import styled from 'styled-components'
 import { useProfile } from 'state/profile/hooks'
-import ProfileAvatarWithTeam from 'components/ProfileAvatarWithTeam'
+import ProfileAvatar from 'views/Profile/components/ProfileAvatar'
 import { useTranslation } from 'contexts/Localization'
 import truncateHash from 'utils/truncateHash'
 
@@ -69,7 +69,7 @@ const UserDetail = () => {
     <>
       <Desktop>
         <Box mr="24px">
-          <Sticker>{profile ? <ProfileAvatarWithTeam profile={profile} /> : <StyledNoProfileAvatarIcon />}</Sticker>
+          <Sticker>{profile ? <ProfileAvatar profile={profile} /> : <StyledNoProfileAvatarIcon />}</Sticker>
         </Box>
         <Flex flexDirection="column">
           {getDesktopHeading()}

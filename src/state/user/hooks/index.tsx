@@ -21,16 +21,6 @@ import {
   updateUserSingleHopOnly,
   updateUserSlippageTolerance,
   updateGasPrice,
-  addWatchlistToken,
-  addWatchlistPool,
-  updateUserPoolStakedOnly,
-  updateUserPoolsViewMode,
-  ViewMode,
-  updateUserFarmsViewMode,
-  updateUserPredictionChartDisclaimerShow,
-  updateUserPredictionAcceptedRisk,
-  updateUserUsernameVisibility,
-  updateUserExpertModeAcknowledgementShow,
 } from '../actions'
 import { deserializeToken, GAS_PRICE_GWEI, serializeToken } from './helpers'
 
@@ -126,124 +116,6 @@ export function useUserFarmStakedOnly(isActive: boolean): [boolean, (stakedOnly:
     userFarmStakedOnly === FarmStakedOnly.ON_FINISHED ? !isActive : userFarmStakedOnly === FarmStakedOnly.TRUE,
     setUserFarmStakedOnly,
   ]
-}
-
-export function useUserPoolStakedOnly(): [boolean, (stakedOnly: boolean) => void] {
-  const dispatch = useDispatch<AppDispatch>()
-  const userPoolStakedOnly = useSelector<AppState, AppState['user']['userPoolStakedOnly']>((state) => {
-    return state.user.userPoolStakedOnly
-  })
-
-  const setUserPoolStakedOnly = useCallback(
-    (stakedOnly: boolean) => {
-      dispatch(updateUserPoolStakedOnly({ userPoolStakedOnly: stakedOnly }))
-    },
-    [dispatch],
-  )
-
-  return [userPoolStakedOnly, setUserPoolStakedOnly]
-}
-
-export function useUserPoolsViewMode(): [ViewMode, (viewMode: ViewMode) => void] {
-  const dispatch = useDispatch<AppDispatch>()
-  const userPoolsViewMode = useSelector<AppState, AppState['user']['userPoolsViewMode']>((state) => {
-    return state.user.userPoolsViewMode
-  })
-
-  const setUserPoolsViewMode = useCallback(
-    (viewMode: ViewMode) => {
-      dispatch(updateUserPoolsViewMode({ userPoolsViewMode: viewMode }))
-    },
-    [dispatch],
-  )
-
-  return [userPoolsViewMode, setUserPoolsViewMode]
-}
-
-export function useUserFarmsViewMode(): [ViewMode, (viewMode: ViewMode) => void] {
-  const dispatch = useDispatch<AppDispatch>()
-  const userFarmsViewMode = useSelector<AppState, AppState['user']['userFarmsViewMode']>((state) => {
-    return state.user.userFarmsViewMode
-  })
-
-  const setUserFarmsViewMode = useCallback(
-    (viewMode: ViewMode) => {
-      dispatch(updateUserFarmsViewMode({ userFarmsViewMode: viewMode }))
-    },
-    [dispatch],
-  )
-
-  return [userFarmsViewMode, setUserFarmsViewMode]
-}
-
-export function useUserPredictionAcceptedRisk(): [boolean, (acceptedRisk: boolean) => void] {
-  const dispatch = useDispatch<AppDispatch>()
-  const userPredictionAcceptedRisk = useSelector<AppState, AppState['user']['userPredictionAcceptedRisk']>((state) => {
-    return state.user.userPredictionAcceptedRisk
-  })
-
-  const setUserPredictionAcceptedRisk = useCallback(
-    (acceptedRisk: boolean) => {
-      dispatch(updateUserPredictionAcceptedRisk({ userAcceptedRisk: acceptedRisk }))
-    },
-    [dispatch],
-  )
-
-  return [userPredictionAcceptedRisk, setUserPredictionAcceptedRisk]
-}
-
-export function useUserPredictionChartDisclaimerShow(): [boolean, (showDisclaimer: boolean) => void] {
-  const dispatch = useDispatch<AppDispatch>()
-  const userPredictionChartDisclaimerShow = useSelector<
-    AppState,
-    AppState['user']['userPredictionChartDisclaimerShow']
-  >((state) => {
-    return state.user.userPredictionChartDisclaimerShow
-  })
-
-  const setPredictionUserChartDisclaimerShow = useCallback(
-    (showDisclaimer: boolean) => {
-      dispatch(updateUserPredictionChartDisclaimerShow({ userShowDisclaimer: showDisclaimer }))
-    },
-    [dispatch],
-  )
-
-  return [userPredictionChartDisclaimerShow, setPredictionUserChartDisclaimerShow]
-}
-
-export function useUserExpertModeAcknowledgementShow(): [boolean, (showAcknowledgement: boolean) => void] {
-  const dispatch = useDispatch<AppDispatch>()
-  const userExpertModeAcknowledgementShow = useSelector<
-    AppState,
-    AppState['user']['userExpertModeAcknowledgementShow']
-  >((state) => {
-    return state.user.userExpertModeAcknowledgementShow
-  })
-
-  const setUserExpertModeAcknowledgementShow = useCallback(
-    (showAcknowledgement: boolean) => {
-      dispatch(updateUserExpertModeAcknowledgementShow({ userExpertModeAcknowledgementShow: showAcknowledgement }))
-    },
-    [dispatch],
-  )
-
-  return [userExpertModeAcknowledgementShow, setUserExpertModeAcknowledgementShow]
-}
-
-export function useUserUsernameVisibility(): [boolean, (usernameVisibility: boolean) => void] {
-  const dispatch = useDispatch<AppDispatch>()
-  const userUsernameVisibility = useSelector<AppState, AppState['user']['userUsernameVisibility']>((state) => {
-    return state.user.userUsernameVisibility
-  })
-
-  const setUserUsernameVisibility = useCallback(
-    (usernameVisibility: boolean) => {
-      dispatch(updateUserUsernameVisibility({ userUsernameVisibility: usernameVisibility }))
-    },
-    [dispatch],
-  )
-
-  return [userUsernameVisibility, setUserUsernameVisibility]
 }
 
 export function useUserTransactionTTL(): [number, (slippage: number) => void] {
@@ -393,28 +265,4 @@ export function useTrackedTokenPairs(): [Token, Token][] {
 
     return Object.keys(keyed).map((key) => keyed[key])
   }, [combinedList])
-}
-
-export const useWatchlistTokens = (): [string[], (address: string) => void] => {
-  const dispatch = useDispatch<AppDispatch>()
-  const savedTokens = useSelector((state: AppState) => state.user.watchlistTokens) ?? []
-  const updatedSavedTokens = useCallback(
-    (address: string) => {
-      dispatch(addWatchlistToken({ address }))
-    },
-    [dispatch],
-  )
-  return [savedTokens, updatedSavedTokens]
-}
-
-export const useWatchlistPools = (): [string[], (address: string) => void] => {
-  const dispatch = useDispatch<AppDispatch>()
-  const savedPools = useSelector((state: AppState) => state.user.watchlistPools) ?? []
-  const updateSavedPools = useCallback(
-    (address: string) => {
-      dispatch(addWatchlistPool({ address }))
-    },
-    [dispatch],
-  )
-  return [savedPools, updateSavedPools]
 }

@@ -1,8 +1,8 @@
 import React from 'react'
 import styled from 'styled-components'
 import { NoProfileAvatarIcon, LaurelLeftIcon, LaurelRightIcon, Skeleton } from '@pancakeswap/uikit'
-import ProfileAvatarWithTeam from 'components/ProfileAvatarWithTeam'
 import { YourScoreProps } from '../../types'
+import ProfileAvatar from '../../../Profile/components/ProfileAvatar'
 import Sticker from '../Sticker'
 
 const Wrapper = styled.div`
@@ -14,7 +14,7 @@ const Wrapper = styled.div`
 const LaurelWrapper = styled.div<{ dir?: 'left' | 'right' }>`
   transform: ${({ dir }) => (dir === 'left' ? 'rotate(30deg)' : 'rotate(-30deg)')};
   svg {
-    fill: #27262c;
+    fill: #ffffff00;
     opacity: 0.5;
     height: 32px;
     width: auto;
@@ -44,7 +44,7 @@ const ScoreHeader: React.FC<YourScoreProps> = ({ profile, isLoading }) => {
         <Skeleton height="96px" width="96px" variant="circle" />
       ) : (
         <ProfileWrapper>
-          <Sticker>{profile ? <ProfileAvatarWithTeam profile={profile} /> : <StyledNoProfileAvatarIcon />}</Sticker>
+          <Sticker>{profile ? <ProfileAvatar profile={profile} /> : <StyledNoProfileAvatarIcon />}</Sticker>
         </ProfileWrapper>
       )}
 

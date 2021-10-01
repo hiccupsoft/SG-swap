@@ -28,13 +28,11 @@ import {
   TotalWonMarketResponse,
   UserResponse,
 } from './queries'
-import { ROUNDS_PER_PAGE } from './config'
 
 export enum Result {
   WIN = 'win',
   LOSE = 'lose',
   CANCELED = 'canceled',
-  HOUSE = 'house',
   LIVE = 'live',
 }
 
@@ -45,50 +43,6 @@ export const numberOrNull = (value: string) => {
 
   const valueNum = Number(value)
   return Number.isNaN(valueNum) ? null : valueNum
-}
-
-const getRoundPosition = (positionResponse: string) => {
-  if (positionResponse === 'Bull') {
-    return BetPosition.BULL
-  }
-
-  if (positionResponse === 'Bear') {
-    return BetPosition.BEAR
-  }
-
-  if (positionResponse === 'House') {
-    return BetPosition.HOUSE
-  }
-
-  return null
-}
-
-export const transformBetResponse = (betResponse: BetResponse): Bet => {
-  const bet = {
-    id: betResponse.id,
-    hash: betResponse.hash,
-    block: numberOrNull(betResponse.block),
-    amount: betResponse.amount ? parseFloat(betResponse.amount) : 0,
-    position: betResponse.position === 'Bull' ? BetPosition.BULL : BetPosition.BEAR,
-    claimed: betResponse.claimed,
-    claimedAt: numberOrNull(betResponse.claimedAt),
-    claimedBlock: numberOrNull(betResponse.claimedBlock),
-    claimedHash: betResponse.claimedHash,
-    claimedBNB: betResponse.claimedBNB ? parseFloat(betResponse.claimedBNB) : 0,
-    claimedNetBNB: betResponse.claimedNetBNB ? parseFloat(betResponse.claimedNetBNB) : 0,
-    createdAt: numberOrNull(betResponse.createdAt),
-    updatedAt: numberOrNull(betResponse.updatedAt),
-  } as Bet
-
-  if (betResponse.user) {
-    bet.user = transformUserResponse(betResponse.user)
-  }
-
-  if (betResponse.round) {
-    bet.round = transformRoundResponse(betResponse.round)
-  }
-
-  return bet
 }
 
 export const transformUserResponse = (userResponse: UserResponse): PredictionUser => {
@@ -127,6 +81,46 @@ export const transformUserResponse = (userResponse: UserResponse): PredictionUse
     averageBNB: averageBNB ? parseFloat(averageBNB) : 0,
     netBNB: netBNB ? parseFloat(netBNB) : 0,
   }
+}
+
+const getRoundPosition = (positionResponse: string) => {
+  if (positionResponse === 'Bull') {
+    return BetPosition.BULL
+  }
+
+  if (positionResponse === 'Bear') {
+    return BetPosition.BEAR
+  }
+
+  return null
+}
+
+export const transformBetResponse = (betResponse: BetResponse): Bet => {
+  const bet = {
+    id: betResponse.id,
+    hash: betResponse.hash,
+    block: numberOrNull(betResponse.block),
+    amount: betResponse.amount ? parseFloat(betResponse.amount) : 0,
+    position: betResponse.position === 'Bull' ? BetPosition.BULL : BetPosition.BEAR,
+    claimed: betResponse.claimed,
+    claimedAt: numberOrNull(betResponse.claimedAt),
+    claimedBlock: numberOrNull(betResponse.claimedBlock),
+    claimedHash: betResponse.claimedHash,
+    claimedBNB: betResponse.claimedBNB ? parseFloat(betResponse.claimedBNB) : 0,
+    claimedNetBNB: betResponse.claimedNetBNB ? parseFloat(betResponse.claimedNetBNB) : 0,
+    createdAt: numberOrNull(betResponse.createdAt),
+    updatedAt: numberOrNull(betResponse.updatedAt),
+  } as Bet
+
+  if (betResponse.user) {
+    bet.user = transformUserResponse(betResponse.user)
+  }
+
+  if (betResponse.round) {
+    bet.round = transformRoundResponse(betResponse.round)
+  }
+
+  return bet
 }
 
 export const transformRoundResponse = (roundResponse: RoundResponse): Round => {
@@ -194,11 +188,6 @@ export const getRoundResult = (bet: Bet, currentEpoch: number): Result => {
   if (round.epoch >= currentEpoch - 1) {
     return Result.LIVE
   }
-
-  if (bet.round.position === BetPosition.HOUSE) {
-    return Result.HOUSE
-  }
-
   const roundResultPosition = round.closePrice > round.lockPrice ? BetPosition.BULL : BetPosition.BEAR
 
   return bet.position === roundResultPosition ? Result.WIN : Result.LOSE
@@ -237,9 +226,13 @@ export const getTotalWon = async (): Promise<number> => {
   return Math.max(totalBNB - totalBNBTreasury, 0)
 }
 
-type WhereClause = Record<string, string | number | boolean | string[]>
+type BetHistoryWhereClause = Record<string, string | number | boolean | string[]>
 
-export const getBetHistory = async (where: WhereClause = {}, first = 1000, skip = 0): Promise<BetResponse[]> => {
+export const getBetHistory = async (
+  where: BetHistoryWhereClause = {},
+  first = 1000,
+  skip = 0,
+): Promise<BetResponse[]> => {
   const response = await request(
     GRAPH_API_PREDICTION,
     gql`
@@ -283,6 +276,7 @@ export const getBet = async (betId: string): Promise<BetResponse> => {
   return response.bet
 }
 
+// V2 REFACTOR
 export const getLedgerData = async (account: string, epochs: number[]) => {
   const address = getPredictionsAddress()
   const ledgerCalls = epochs.map((epoch) => ({
@@ -292,56 +286,6 @@ export const getLedgerData = async (account: string, epochs: number[]) => {
   }))
   const response = await multicallv2<PredictionsLedgerResponse[]>(predictionsAbi, ledgerCalls)
   return response
-}
-
-export const LEADERBOARD_RESULTS_PER_PAGE = 20
-
-interface GetPredictionUsersOptions {
-  skip?: number
-  first?: number
-  orderBy?: string
-  orderDir?: string
-  where?: WhereClause
-}
-
-const defaultPredictionUserOptions = {
-  skip: 0,
-  first: LEADERBOARD_RESULTS_PER_PAGE,
-  orderBy: 'createdAt',
-  orderDir: 'desc',
-}
-
-export const getPredictionUsers = async (options: GetPredictionUsersOptions = {}): Promise<UserResponse[]> => {
-  const { first, skip, where, orderBy, orderDir } = { ...defaultPredictionUserOptions, ...options }
-  const response = await request(
-    GRAPH_API_PREDICTION,
-    gql`
-      query getUsers($first: Int!, $skip: Int!, $where: User_filter, $orderBy: User_orderBy, $orderDir: OrderDirection) {
-        users(first: $first, skip: $skip, where: $where, orderBy: $orderBy, orderDirection: $orderDir) {
-          ${getUserBaseFields()} 
-        }
-      }
-    `,
-    { first, skip, where, orderBy, orderDir },
-  )
-  return response.users
-}
-
-export const getPredictionUser = async (account: string): Promise<UserResponse> => {
-  const response = await request(
-    GRAPH_API_PREDICTION,
-    gql`
-      query getUser($id: ID!) {
-        user(id: $id) {
-          ${getUserBaseFields()}
-        }
-      }
-  `,
-    {
-      id: account.toLowerCase(),
-    },
-  )
-  return response.user
 }
 
 export const getClaimStatuses = async (
@@ -520,23 +464,13 @@ export const parseBigNumberObj = <T = Record<string, any>, K = Record<string, an
   }, {}) as K
 }
 
-export const fetchUsersRoundsLength = async (account: string) => {
-  try {
-    const contract = getPredictionsContract()
-    const length = await contract.getUserRoundsLength(account)
-    return length
-  } catch {
-    return ethers.BigNumber.from(0)
-  }
-}
-
 /**
  * Fetches rounds a user has participated in
  */
 export const fetchUserRounds = async (
   account: string,
   cursor = 0,
-  size = ROUNDS_PER_PAGE,
+  size = 1000,
 ): Promise<{ [key: string]: ReduxNodeLedger }> => {
   const contract = getPredictionsContract()
 
@@ -550,6 +484,30 @@ export const fetchUserRounds = async (
       }
     }, {})
   } catch {
+    // When the results run out the contract throws an error.
+    return null
+  }
+}
+
+/**
+ * Fetches the latest rounds by checking the number of rounds a user has participated in first
+ * in order to calculate the correct cursor
+ */
+export const fetchLatestUserRounds = async (account: string, size = 1000) => {
+  const contract = getPredictionsContract()
+
+  try {
+    const roundCount = await contract.getUserRoundsLength(account)
+
+    if (roundCount.eq(0)) {
+      return null
+    }
+
+    const cursor = roundCount.lte(size) ? 0 : roundCount.sub(size).toNumber()
+    const userRounds = await fetchUserRounds(account, cursor, size)
+
+    return userRounds
+  } catch (error) {
     // When the results run out the contract throws an error.
     return null
   }

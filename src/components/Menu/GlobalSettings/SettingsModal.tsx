@@ -1,45 +1,42 @@
 import React, { useState } from 'react'
 import styled from 'styled-components'
-import { Text, PancakeToggle, Toggle, Flex, Modal, InjectedModalProps, ThemeSwitcher } from '@pancakeswap/uikit'
-import {
-  useAudioModeManager,
-  useExpertModeManager,
-  useUserExpertModeAcknowledgementShow,
-  useUserSingleHopOnly,
-} from 'state/user/hooks'
+import { Text, PancakeToggle, Toggle, Flex, Modal, InjectedModalProps } from '@pancakeswap/uikit'
+import { useAudioModeManager, useExpertModeManager, useUserSingleHopOnly } from 'state/user/hooks'
 import { useTranslation } from 'contexts/Localization'
 import { useSwapActionHandlers } from 'state/swap/hooks'
+import usePersistState from 'hooks/usePersistState'
 import useTheme from 'hooks/useTheme'
 import QuestionHelper from '../../QuestionHelper'
 import TransactionSettings from './TransactionSettings'
 import ExpertModal from './ExpertModal'
 import GasSettings from './GasSettings'
 
-const ScrollableContainer = styled(Flex)`
-  flex-direction: column;
-  max-height: 400px;
-  ${({ theme }) => theme.mediaQueries.sm} {
-    max-height: none;
+// TODO: Temporary. Once uikit is merged with this style change, this can be removed.
+const PancakeToggleWrapper = styled.div`
+  .pancakes {
+    position: absolute;
   }
 `
 
 const SettingsModal: React.FC<InjectedModalProps> = ({ onDismiss }) => {
   const [showConfirmExpertModal, setShowConfirmExpertModal] = useState(false)
-  const [showExpertModeAcknowledgement, setShowExpertModeAcknowledgement] = useUserExpertModeAcknowledgementShow()
+  const [rememberExpertModeAcknowledgement, setRememberExpertModeAcknowledgement] = usePersistState(false, {
+    localStorageKey: 'pancake_expert_mode_remember_acknowledgement',
+  })
   const [expertMode, toggleExpertMode] = useExpertModeManager()
   const [singleHopOnly, setSingleHopOnly] = useUserSingleHopOnly()
   const [audioPlay, toggleSetAudioMode] = useAudioModeManager()
   const { onChangeRecipient } = useSwapActionHandlers()
 
   const { t } = useTranslation()
-  const { theme, isDark, toggleTheme } = useTheme()
+  const { theme } = useTheme()
 
   if (showConfirmExpertModal) {
     return (
       <ExpertModal
         setShowConfirmExpertModal={setShowConfirmExpertModal}
         onDismiss={onDismiss}
-        setShowExpertModeAcknowledgement={setShowExpertModeAcknowledgement}
+        setRememberExpertModeAcknowledgement={setRememberExpertModeAcknowledgement}
       />
     )
   }
@@ -48,7 +45,7 @@ const SettingsModal: React.FC<InjectedModalProps> = ({ onDismiss }) => {
     if (expertMode) {
       onChangeRecipient(null)
       toggleExpertMode()
-    } else if (!showExpertModeAcknowledgement) {
+    } else if (rememberExpertModeAcknowledgement) {
       onChangeRecipient(null)
       toggleExpertMode()
     } else {
@@ -61,17 +58,13 @@ const SettingsModal: React.FC<InjectedModalProps> = ({ onDismiss }) => {
       title={t('Settings')}
       headerBackground="gradients.cardHeader"
       onDismiss={onDismiss}
-      style={{ maxWidth: '420px' }}
+      style={{ maxWidth: '420px', overflowY: 'auto' }}
     >
-      <ScrollableContainer>
+      <Flex flexDirection="column">
         <Flex pb="24px" flexDirection="column">
           <Text bold textTransform="uppercase" fontSize="12px" color="secondary" mb="24px">
             {t('Global')}
           </Text>
-          <Flex justifyContent="space-between">
-            <Text mb="24px">{t('Dark mode')}</Text>
-            <ThemeSwitcher isDark={isDark} toggleTheme={toggleTheme} />
-          </Flex>
           <GasSettings />
         </Flex>
         <Flex pt="24px" flexDirection="column" borderTop={`1px ${theme.colors.cardBorder} solid`}>
@@ -114,9 +107,11 @@ const SettingsModal: React.FC<InjectedModalProps> = ({ onDismiss }) => {
               ml="4px"
             />
           </Flex>
-          <PancakeToggle checked={audioPlay} onChange={toggleSetAudioMode} scale="md" />
+          <PancakeToggleWrapper>
+            <PancakeToggle checked={audioPlay} onChange={toggleSetAudioMode} scale="md" />
+          </PancakeToggleWrapper>
         </Flex>
-      </ScrollableContainer>
+      </Flex>
     </Modal>
   )
 }

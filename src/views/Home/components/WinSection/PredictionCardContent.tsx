@@ -1,14 +1,12 @@
 import React, { useState, useEffect } from 'react'
 import styled from 'styled-components'
-import { Flex, Text, Skeleton, Button, ArrowForwardIcon, Heading } from '@pancakeswap/uikit'
-import { Link } from 'react-router-dom'
+import { Flex, Text, Skeleton, Link, Button, ArrowForwardIcon, Heading } from '@pancakeswap/uikit'
 import { useTranslation } from 'contexts/Localization'
 import { formatLocalisedCompactNumber } from 'utils/formatBalance'
 import useRefresh from 'hooks/useRefresh'
 import useIntersectionObserver from 'hooks/useIntersectionObserver'
 import { getTotalWon } from 'state/predictions/helpers'
-import { useBNBBusdPrice } from 'hooks/useBUSDPrice'
-import { multiplyPriceByAmount } from 'utils/prices'
+import { usePriceBnbBusd } from 'state/farms/hooks'
 
 const StyledLink = styled(Link)`
   width: 100%;
@@ -19,9 +17,9 @@ const PredictionCardContent = () => {
   const { slowRefresh } = useRefresh()
   const { observerRef, isIntersecting } = useIntersectionObserver()
   const [loadData, setLoadData] = useState(false)
-  const bnbBusdPrice = useBNBBusdPrice()
+  const bnbBusdPrice = usePriceBnbBusd()
   const [bnbWon, setBnbWon] = useState(0)
-  const bnbWonInUsd = multiplyPriceByAmount(bnbBusdPrice, bnbWon)
+  const [bnbWonInUsd, setBnbWonInUsd] = useState(0)
 
   const localisedBnbUsdString = formatLocalisedCompactNumber(bnbWonInUsd)
   const bnbWonText = t('$%bnbWonInUsd% in BNB won so far', { bnbWonInUsd: localisedBnbUsdString })
@@ -44,9 +42,16 @@ const PredictionCardContent = () => {
     }
   }, [slowRefresh, loadData])
 
+  useEffect(() => {
+    if (bnbBusdPrice.gt(0) && bnbWon > 0) {
+      setBnbWonInUsd(bnbBusdPrice.times(bnbWon).toNumber())
+    }
+  }, [bnbBusdPrice, bnbWon])
+
   return (
     <>
       <Flex flexDirection="column" mt="48px">
+        <div ref={observerRef} />
         <Text color="#280D5F" bold fontSize="16px">
           {t('Prediction')}
         </Text>
@@ -69,7 +74,7 @@ const PredictionCardContent = () => {
         </Text>
       </Flex>
       <Flex alignItems="center" justifyContent="center">
-        <StyledLink to="/prediction" id="homepage-prediction-cta">
+        <StyledLink href="/prediction" id="homepage-prediction-cta">
           <Button width="100%">
             <Text bold color="invertedContrast">
               {t('Play')}

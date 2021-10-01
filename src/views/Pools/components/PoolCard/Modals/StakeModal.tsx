@@ -19,7 +19,8 @@ import useToast from 'hooks/useToast'
 import BigNumber from 'bignumber.js'
 import RoiCalculatorModal from 'components/RoiCalculatorModal'
 import { getFullDisplayBalance, formatNumber, getDecimalAmount } from 'utils/formatBalance'
-import { DeserializedPool } from 'state/types'
+import { Pool } from 'state/types'
+import { getAddress } from 'utils/addressHelpers'
 import { getInterestBreakdown } from 'utils/compoundApyHelpers'
 import PercentageButton from './PercentageButton'
 import useStakePool from '../../../hooks/useStakePool'
@@ -27,7 +28,7 @@ import useUnstakePool from '../../../hooks/useUnstakePool'
 
 interface StakeModalProps {
   isBnbPool: boolean
-  pool: DeserializedPool
+  pool: Pool
   stakingTokenBalance: BigNumber
   stakingTokenPrice: number
   isRemovingStake?: boolean
@@ -75,10 +76,6 @@ const StakeModal: React.FC<StakeModalProps> = ({
     }
     return stakingLimit.gt(0) && stakingTokenBalance.gt(stakingLimit) ? stakingLimit : stakingTokenBalance
   }
-  const fullDecimalStakeAmount = getDecimalAmount(new BigNumber(stakeAmount), stakingToken.decimals)
-  const userNotEnoughToken = isRemovingStake
-    ? userData.stakedBalance.lt(fullDecimalStakeAmount)
-    : userData.stakingTokenBalance.lt(fullDecimalStakeAmount)
 
   const usdValueStaked = new BigNumber(stakeAmount).times(stakingTokenPrice)
   const formattedUsdValueStaked = !usdValueStaked.isNaN() && formatNumber(usdValueStaked.toNumber())
@@ -91,21 +88,14 @@ const StakeModal: React.FC<StakeModalProps> = ({
   const annualRoi = interestBreakdown[3] * pool.earningTokenPrice
   const formattedAnnualRoi = formatNumber(annualRoi, annualRoi > 10000 ? 0 : 2, annualRoi > 10000 ? 0 : 2)
 
-  const getTokenLink = stakingToken.address ? `/swap?outputCurrency=${stakingToken.address}` : '/swap'
+  const getTokenLink = stakingToken.address ? `/swap?outputCurrency=${getAddress(stakingToken.address)}` : '/swap'
 
   useEffect(() => {
     if (stakingLimit.gt(0) && !isRemovingStake) {
+      const fullDecimalStakeAmount = getDecimalAmount(new BigNumber(stakeAmount), stakingToken.decimals)
       setHasReachedStakedLimit(fullDecimalStakeAmount.plus(userData.stakedBalance).gt(stakingLimit))
     }
-  }, [
-    stakeAmount,
-    stakingLimit,
-    userData,
-    stakingToken,
-    isRemovingStake,
-    setHasReachedStakedLimit,
-    fullDecimalStakeAmount,
-  ])
+  }, [stakeAmount, stakingLimit, userData, stakingToken, isRemovingStake, setHasReachedStakedLimit])
 
   const handleStakeInputChange = (input: string) => {
     if (input) {
@@ -131,9 +121,10 @@ const StakeModal: React.FC<StakeModalProps> = ({
 
   const handleConfirmClick = async () => {
     setPendingTx(true)
-    try {
-      if (isRemovingStake) {
-        // unstaking
+
+    if (isRemovingStake) {
+      // unstaking
+      try {
         await onUnstake(stakeAmount, stakingToken.decimals)
         toastSuccess(
           `${t('Unstaked')}!`,
@@ -141,7 +132,14 @@ const StakeModal: React.FC<StakeModalProps> = ({
             symbol: earningToken.symbol,
           }),
         )
-      } else {
+        setPendingTx(false)
+        onDismiss()
+      } catch (e) {
+        toastError(t('Error'), t('Please try again. Confirm the transaction and make sure you are paying enough gas!'))
+        setPendingTx(false)
+      }
+    } else {
+      try {
         // staking
         await onStake(stakeAmount, stakingToken.decimals)
         toastSuccess(
@@ -150,12 +148,12 @@ const StakeModal: React.FC<StakeModalProps> = ({
             symbol: stakingToken.symbol,
           }),
         )
+        setPendingTx(false)
+        onDismiss()
+      } catch (e) {
+        toastError(t('Error'), t('Please try again. Confirm the transaction and make sure you are paying enough gas!'))
+        setPendingTx(false)
       }
-      setPendingTx(false)
-      onDismiss()
-    } catch (e) {
-      toastError(t('Error'), t('Please try again. Confirm the transaction and make sure you are paying enough gas!'))
-      setPendingTx(false)
     }
   }
 
@@ -194,7 +192,12 @@ const StakeModal: React.FC<StakeModalProps> = ({
       <Flex alignItems="center" justifyContent="space-between" mb="8px">
         <Text bold>{isRemovingStake ? t('Unstake') : t('Stake')}:</Text>
         <Flex alignItems="center" minWidth="70px">
-          <Image src={`/images/tokens/${stakingToken.address}.png`} width={24} height={24} alt={stakingToken.symbol} />
+          <Image
+            src={`/images/tokens/${getAddress(stakingToken.address)}.png`}
+            width={24}
+            height={24}
+            alt={stakingToken.symbol}
+          />
           <Text ml="4px" bold>
             {stakingToken.symbol}
           </Text>
@@ -204,7 +207,7 @@ const StakeModal: React.FC<StakeModalProps> = ({
         value={stakeAmount}
         onUserInput={handleStakeInputChange}
         currencyValue={stakingTokenPrice !== 0 && `~${formattedUsdValueStaked || 0} USD`}
-        isWarning={hasReachedStakeLimit || userNotEnoughToken}
+        isWarning={hasReachedStakeLimit}
         decimals={stakingToken.decimals}
       />
       {hasReachedStakeLimit && (
@@ -212,13 +215,6 @@ const StakeModal: React.FC<StakeModalProps> = ({
           {t('Maximum total stake: %amount% %token%', {
             amount: getFullDisplayBalance(new BigNumber(stakingLimit), stakingToken.decimals, 0),
             token: stakingToken.symbol,
-          })}
-        </Text>
-      )}
-      {userNotEnoughToken && (
-        <Text color="failure" fontSize="12px" style={{ textAlign: 'right' }} mt="4px">
-          {t('Insufficient %symbol% balance', {
-            symbol: stakingToken.symbol,
           })}
         </Text>
       )}
@@ -259,7 +255,7 @@ const StakeModal: React.FC<StakeModalProps> = ({
         isLoading={pendingTx}
         endIcon={pendingTx ? <AutoRenewIcon spin color="currentColor" /> : null}
         onClick={handleConfirmClick}
-        disabled={!stakeAmount || parseFloat(stakeAmount) === 0 || hasReachedStakeLimit || userNotEnoughToken}
+        disabled={!stakeAmount || parseFloat(stakeAmount) === 0 || hasReachedStakeLimit}
         mt="24px"
       >
         {pendingTx ? t('Confirming') : t('Confirm')}

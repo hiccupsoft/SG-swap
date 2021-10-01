@@ -1,7 +1,7 @@
 export default {
   masterChef: {
     97: '0x1d32c2945C8FDCBc7156c553B7cEa4325a17f4f9',
-    56: '0x73feaa1eE314F8c655E354234017bE2193C9E24E',
+    56: '0x6fE51F98962938BCCbF5f32976cadBd6ea463072',
   },
   sousChef: {
     97: '0xd3af5fe61dbaf8f73149bfcfa9fb653ff096029a',
@@ -48,7 +48,7 @@ export default {
     97: '0x24ec6962dbe874F6B67B5C50857565667fA0854F',
   },
   cakeVault: {
-    56: '0xa80240Eb5d7E05d3F250cF000eEc0891d00b51CC',
+    56: '0x6fE51F98962938BCCbF5f32976cadBd6ea463072',
     97: '',
   },
   predictions: {
@@ -74,13 +74,5 @@ export default {
   farmAuction: {
     56: '0xb92Ab7c1edcb273AbA24b0656cEb3681654805D2',
     97: '0x3F9602593b4f7C67ab045DB51BbDEa94E40fA9Fe',
-  },
-  AnniversaryAchievement: {
-    56: '0x787980da5491118C3cB33B21aB50c8c379D2C552',
-    97: '0x981aE96378e770DE44F89cD9175E708f9EDB70a9',
-  },
-  nftMarket: {
-    56: '0x17539cCa21C7933Df5c980172d22659B8C345C5A',
-    97: '0x7f9f37ddcaa33893f9beb3d8748c8d6bfbde6ab2',
   },
 }

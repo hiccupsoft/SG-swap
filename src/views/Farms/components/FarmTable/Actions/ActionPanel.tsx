@@ -150,7 +150,7 @@ const ActionPanel: React.FunctionComponent<ActionPanelProps> = ({
   })
   const lpAddress = getAddress(farm.lpAddresses)
   const bsc = getBscScanLink(lpAddress, 'address')
-  const info = `/info/pool/${lpAddress}`
+  const info = `https://lovepot.floki-coin.io/pool/${lpAddress}`
 
   return (
     <Container expanded={expanded}>

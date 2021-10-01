@@ -13,7 +13,7 @@ import {
   fetchCakeVaultFees,
   fetchPoolsStakingLimitsAsync,
 } from '.'
-import { State, DeserializedPool } from '../types'
+import { State, Pool } from '../types'
 import { transformPool } from './helpers'
 
 export const useFetchPublicPoolsData = () => {
@@ -31,7 +31,7 @@ export const useFetchPublicPoolsData = () => {
   }, [dispatch, slowRefresh])
 }
 
-export const useFetchUserPools = (account) => {
+export const usePools = (account): { pools: Pool[]; userDataLoaded: boolean } => {
   const { fastRefresh } = useRefresh()
   const dispatch = useAppDispatch()
   useEffect(() => {
@@ -39,9 +39,7 @@ export const useFetchUserPools = (account) => {
       dispatch(fetchPoolsUserDataAsync(account))
     }
   }, [account, dispatch, fastRefresh])
-}
 
-export const usePools = (): { pools: DeserializedPool[]; userDataLoaded: boolean } => {
   const { pools, userDataLoaded } = useSelector((state: State) => ({
     pools: state.pools.data,
     userDataLoaded: state.pools.userDataLoaded,

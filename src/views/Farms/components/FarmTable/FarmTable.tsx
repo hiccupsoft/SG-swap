@@ -22,7 +22,6 @@ const Container = styled.div`
 
 const TableWrapper = styled.div`
   overflow: visible;
-  scroll-margin-top: 64px;
 
   &::-webkit-scrollbar {
     display: none;
@@ -72,7 +71,7 @@ const FarmTable: React.FC<ITableProps> = (props) => {
   }
 
   return (
-    <Container id="farms-table">
+    <Container>
       <TableContainer>
         <TableWrapper ref={tableWrapperEl}>
           <StyledTable>

@@ -27,8 +27,7 @@ export const getPoolApr = (
  * @param poolWeight allocationPoint / totalAllocationPoint
  * @param cakePriceUsd Cake price in USD
  * @param poolLiquidityUsd Total pool liquidity in USD
- * @param farmAddress Farm Address
- * @returns Farm Apr
+ * @returns
  */
 export const getFarmApr = (
   poolWeight: BigNumber,
@@ -36,7 +35,7 @@ export const getFarmApr = (
   poolLiquidityUsd: BigNumber,
   farmAddress: string,
 ): { cakeRewardsApr: number; lpRewardsApr: number } => {
-  const yearlyCakeRewardAllocation = poolWeight ? poolWeight.times(CAKE_PER_YEAR) : new BigNumber(NaN)
+  const yearlyCakeRewardAllocation = CAKE_PER_YEAR.times(poolWeight)
   const cakeRewardsApr = yearlyCakeRewardAllocation.times(cakePriceUsd).div(poolLiquidityUsd).times(100)
   let cakeRewardsAprAsNumber = null
   if (!cakeRewardsApr.isNaN() && cakeRewardsApr.isFinite()) {

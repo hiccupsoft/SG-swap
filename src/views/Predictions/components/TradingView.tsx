@@ -48,8 +48,6 @@ const TradingView = () => {
   const { lastUpdated, setLastUpdated } = useLastUpdated()
 
   useEffect(() => {
-    const ele = document.getElementById(TRADING_VIEW_COMPONENT_ID)
-
     const debouncedOnResize = debounce(() => {
       setLastUpdated()
     }, 500)
@@ -58,10 +56,10 @@ const TradingView = () => {
       debouncedOnResize()
     })
 
-    resizeObserver.observe(ele)
+    resizeObserver.observe(document.getElementById(TRADING_VIEW_COMPONENT_ID))
 
     return () => {
-      resizeObserver.unobserve(ele)
+      resizeObserver.unobserve(document.getElementById(TRADING_VIEW_COMPONENT_ID))
     }
   }, [setLastUpdated])
 

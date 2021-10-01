@@ -7,9 +7,8 @@ import { useGetPredictionsStatus, useIsChartPaneOpen } from 'state/predictions/h
 import { useInitialBlock } from 'state/block/hooks'
 import { initializePredictions } from 'state/predictions'
 import { PredictionStatus } from 'state/types'
-import { useUserPredictionAcceptedRisk, useUserPredictionChartDisclaimerShow } from 'state/user/hooks'
+import usePersistState from 'hooks/usePersistState'
 import PageLoader from 'components/Loader/PageLoader'
-import { PageMeta } from 'components/Layout/Page'
 import usePollOraclePrice from './hooks/usePollOraclePrice'
 import usePollPredictions from './hooks/usePollPredictions'
 import Container from './components/Container'
@@ -18,12 +17,13 @@ import SwiperProvider from './context/SwiperProvider'
 import Desktop from './Desktop'
 import Mobile from './Mobile'
 import RiskDisclaimer from './components/RiskDisclaimer'
-import ChartDisclaimer from './components/ChartDisclaimer'
+import ChartDisclaimer, { CHART_LOCAL_STORAGE_KEY } from './components/ChartDisclaimer'
 
 const Predictions = () => {
   const { isDesktop } = useMatchBreakpoints()
-  const [hasAcceptedRisk, setHasAcceptedRisk] = useUserPredictionAcceptedRisk()
-  const [showDisclaimer] = useUserPredictionChartDisclaimerShow()
+  const [hasAcceptedRisk, setHasAcceptedRisk] = usePersistState(false, {
+    localStorageKey: 'pancake_predictions_accepted_risk-2',
+  })
   const { account } = useWeb3React()
   const status = useGetPredictionsStatus()
   const isChartPaneOpen = useIsChartPaneOpen()
@@ -46,10 +46,14 @@ const Predictions = () => {
 
   // Chart Disclaimer
   useEffect(() => {
-    if (isChartPaneOpen && showDisclaimer) {
-      onPresentChartDisclaimerRef.current()
+    if (isChartPaneOpen) {
+      const showChartDisclaimer = JSON.parse(localStorage.getItem(CHART_LOCAL_STORAGE_KEY))
+
+      if (showChartDisclaimer !== true) {
+        onPresentChartDisclaimerRef.current()
+      }
     }
-  }, [onPresentChartDisclaimerRef, isChartPaneOpen, showDisclaimer])
+  }, [onPresentChartDisclaimerRef, isChartPaneOpen])
 
   useEffect(() => {
     if (initialBlock > 0) {
@@ -70,7 +74,6 @@ const Predictions = () => {
       <Helmet>
         <script src="https://s3.tradingview.com/tv.js" type="text/javascript" id="tradingViewWidget" />
       </Helmet>
-      <PageMeta />
       <SwiperProvider>
         <Container>
           {isDesktop ? <Desktop /> : <Mobile />}

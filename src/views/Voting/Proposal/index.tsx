@@ -10,7 +10,7 @@ import {
   useGetVotes,
   useGetProposalLoadingStatus,
 } from 'state/voting/hooks'
-import { fetchProposal, fetchVotes } from 'state/voting'
+import { fetchProposal, fetchVotes, verifyVotes } from 'state/voting'
 import { useTranslation } from 'contexts/Localization'
 import Container from 'components/Layout/Container'
 import ReactMarkdown from 'components/ReactMarkdown'
@@ -22,7 +22,6 @@ import Details from './Details'
 import Results from './Results'
 import Vote from './Vote'
 import Votes from './Votes'
-import { PageMeta } from '../../../components/Layout/Page'
 
 const Proposal = () => {
   const { id }: { id: string } = useParams()
@@ -44,8 +43,13 @@ const Proposal = () => {
 
   // We have to wait for the proposal to load before fetching the votes because we need to include the snapshot
   useEffect(() => {
+    const getVotes = async () => {
+      await dispatch(fetchVotes({ proposalId, block: Number(snapshot) }))
+      dispatch(verifyVotes({ proposalId, snapshot }))
+    }
+
     if (proposalId && snapshot) {
-      dispatch(fetchVotes({ proposalId, block: Number(snapshot) }))
+      getVotes()
     }
   }, [proposalId, snapshot, dispatch])
 
@@ -55,7 +59,6 @@ const Proposal = () => {
 
   return (
     <Container py="40px">
-      <PageMeta />
       <Box mb="40px">
         <Button as={Link} to="/voting" variant="text" startIcon={<ArrowBackIcon color="primary" width="24px" />} px="0">
           {t('Back to Vote Overview')}

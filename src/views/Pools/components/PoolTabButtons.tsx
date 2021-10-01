@@ -1,10 +1,9 @@
 import React from 'react'
 import { useRouteMatch, Link } from 'react-router-dom'
-import { ViewMode } from 'state/user/actions'
 import styled from 'styled-components'
 import { ButtonMenu, ButtonMenuItem, Toggle, Text, NotificationDot } from '@pancakeswap/uikit'
 import { useTranslation } from 'contexts/Localization'
-import ToggleView from './ToggleView/ToggleView'
+import ToggleView, { ViewMode } from './ToggleView/ToggleView'
 
 const ToggleWrapper = styled.div`
   display: flex;
@@ -65,7 +64,7 @@ const PoolTabButtons = ({ stakedOnly, setStakedOnly, hasStakeInFinishedPools, vi
           {t('Live')}
         </ButtonMenuItem>
         <NotificationDot show={hasStakeInFinishedPools}>
-          <ButtonMenuItem id="finished-pools-button" as={Link} to={`${url}/history`}>
+          <ButtonMenuItem as={Link} to={`${url}/history`}>
             {t('Finished')}
           </ButtonMenuItem>
         </NotificationDot>

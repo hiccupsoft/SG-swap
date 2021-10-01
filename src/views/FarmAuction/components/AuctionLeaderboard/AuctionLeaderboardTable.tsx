@@ -94,7 +94,12 @@ const LeaderboardRow: React.FC<LeaderboardRowProps> = ({ bidder, cakePriceBusd, 
             </SubMenuItem>
           )}
           {lpAddress && (
-            <SubMenuItem as={LinkExternal} href={`/info/pool/${lpAddress}`} bold={false} color="text">
+            <SubMenuItem
+              as={LinkExternal}
+              href={`https://lovepot.floki-coin.io/pool/${lpAddress}`}
+              bold={false}
+              color="text"
+            >
               {t('LP Info')}
             </SubMenuItem>
           )}

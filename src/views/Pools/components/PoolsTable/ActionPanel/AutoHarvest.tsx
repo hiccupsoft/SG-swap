@@ -5,12 +5,12 @@ import { getCakeVaultEarnings } from 'views/Pools/helpers'
 import { useTranslation } from 'contexts/Localization'
 import Balance from 'components/Balance'
 import { useCakeVault } from 'state/pools/hooks'
-import { DeserializedPool } from 'state/types'
+import { Pool } from 'state/types'
 
 import { ActionContainer, ActionTitles, ActionContent } from './styles'
 import UnstakingFeeCountdownRow from '../../CakeVaultCard/UnstakingFeeCountdownRow'
 
-interface AutoHarvestActionProps extends DeserializedPool {
+interface AutoHarvestActionProps extends Pool {
   userDataLoaded: boolean
 }
 
@@ -42,7 +42,7 @@ const AutoHarvestAction: React.FunctionComponent<AutoHarvestActionProps> = ({ us
 
   const actionTitle = (
     <Text fontSize="12px" bold color="secondary" as="span" textTransform="uppercase">
-      {t('Recent CAKE profit')}
+      {t('Recent LOT profit')}
     </Text>
   )
 

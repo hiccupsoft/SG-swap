@@ -9,8 +9,7 @@ import { getFilteredBets } from 'state/predictions/helpers'
 import { useAppDispatch } from 'state'
 import {
   useGetCurrentEpoch,
-  useGetCurrentHistoryPage,
-  useGetHistory,
+  useGetHistoryByAccount,
   useGetHistoryFilter,
   useGetIsFetchingHistory,
   useIsHistoryPaneOpen,
@@ -52,14 +51,13 @@ const History = () => {
   const isFetchingHistory = useGetIsFetchingHistory()
   const historyFilter = useGetHistoryFilter()
   const currentEpoch = useGetCurrentEpoch()
-  const currentHistoryPage = useGetCurrentHistoryPage()
   const { t } = useTranslation()
-  const bets = useGetHistory()
+  const bets = useGetHistoryByAccount(account)
   const [activeTab, setActiveTab] = useState(HistoryTabs.ROUNDS)
 
   useEffect(() => {
     if (account && isHistoryPaneOpen) {
-      dispatch(fetchNodeHistory({ account }))
+      dispatch(fetchNodeHistory(account))
     }
   }, [account, currentEpoch, isHistoryPaneOpen, dispatch])
 
@@ -91,7 +89,7 @@ const History = () => {
     <StyledHistory>
       <Header activeTab={activeTab} setActiveTab={setActiveTab} />
       <BetWrapper>
-        {isFetchingHistory && currentHistoryPage === 1 ? (
+        {isFetchingHistory ? (
           <SpinnerWrapper>
             <Spinner size={72} />
           </SpinnerWrapper>

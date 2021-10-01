@@ -129,6 +129,14 @@
       "chainId": 56,
       "decimals": 18,
       "logoURI": "https://pancakeswap.finance/images/tokens/0xa7f552078dcc247c2684336020c03648500c6d9f.png"
+    },
+    {
+      "name": "LovePot",
+      "symbol": "LOT",
+      "address": "0x9286CBD3EEdAC8242d17A88d59FA59d126508211",
+      "chainId": 56,
+      "decimals": 18,
+      "logoURI": "images/tokens/0x9286CBD3EEdAC8242d17A88d59FA59d126508211.png"
     }
   ]
 }

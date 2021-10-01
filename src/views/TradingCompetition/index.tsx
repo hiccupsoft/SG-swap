@@ -71,7 +71,7 @@ const TradingCompetition = () => {
   const { profile, isLoading } = useProfile()
   const { isDark, theme } = useTheme()
   const tradingCompetitionContract = useTradingCompetitionContract()
-  const [currentPhase, setCurrentPhase] = useState(CompetitionPhases.CLAIM)
+  const [currentPhase, setCurrentPhase] = useState(CompetitionPhases.LIVE)
   const [registrationSuccessful, setRegistrationSuccessful] = useState(false)
   const [claimSuccessful, setClaimSuccessful] = useState(false)
   const [userTradingInformation, setUserTradingInformation] = useState({
@@ -138,7 +138,6 @@ const TradingCompetition = () => {
 
     if (account) {
       fetchUserContract()
-      fetchCompetitionInfoContract()
     } else {
       setUserTradingInformation({
         hasRegistered: false,
@@ -149,6 +148,7 @@ const TradingCompetition = () => {
         canClaimNFT: false,
       })
     }
+    fetchCompetitionInfoContract()
   }, [account, registrationSuccessful, claimSuccessful, tradingCompetitionContract])
 
   useEffect(() => {

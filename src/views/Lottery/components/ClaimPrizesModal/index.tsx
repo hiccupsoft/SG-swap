@@ -36,6 +36,7 @@ const BunnyDecoration = styled.div`
 
 const showConfetti = () => {
   confetti({
+    resize: true,
     particleCount: 200,
     startVelocity: 30,
     gravity: 0.5,

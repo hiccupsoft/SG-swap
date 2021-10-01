@@ -1,10 +1,10 @@
 import BigNumber from 'bignumber.js'
-import { SerializedFarm, DeserializedPool, SerializedPool } from 'state/types'
-import { deserializeToken } from 'state/user/hooks/helpers'
+import { Farm, Pool } from 'state/types'
+import { getAddress } from 'utils/addressHelpers'
 import { BIG_ZERO } from 'utils/bigNumber'
 
 type UserData =
-  | DeserializedPool['userData']
+  | Pool['userData']
   | {
       allowance: number | string
       stakingTokenBalance: number | string
@@ -21,29 +21,27 @@ export const transformUserData = (userData: UserData) => {
   }
 }
 
-export const transformPool = (pool: SerializedPool): DeserializedPool => {
-  const { totalStaked, stakingLimit, userData, stakingToken, earningToken, ...rest } = pool
+export const transformPool = (pool: Pool): Pool => {
+  const { totalStaked, stakingLimit, userData, ...rest } = pool
 
   return {
     ...rest,
-    stakingToken: deserializeToken(stakingToken),
-    earningToken: deserializeToken(earningToken),
     userData: transformUserData(userData),
     totalStaked: new BigNumber(totalStaked),
     stakingLimit: new BigNumber(stakingLimit),
-  }
+  } as Pool
 }
 
-export const getTokenPricesFromFarm = (farms: SerializedFarm[]) => {
+export const getTokenPricesFromFarm = (farms: Farm[]) => {
   return farms.reduce((prices, farm) => {
-    const quoteTokenAddress = farm.quoteToken.address.toLocaleLowerCase()
-    const tokenAddress = farm.token.address.toLocaleLowerCase()
+    const quoteTokenAddress = getAddress(farm.quoteToken.address).toLocaleLowerCase()
+    const tokenAddress = getAddress(farm.token.address).toLocaleLowerCase()
     /* eslint-disable no-param-reassign */
     if (!prices[quoteTokenAddress]) {
-      prices[quoteTokenAddress] = new BigNumber(farm.quoteTokenPriceBusd).toNumber()
+      prices[quoteTokenAddress] = new BigNumber(farm.quoteToken.busdPrice).toNumber()
     }
     if (!prices[tokenAddress]) {
-      prices[tokenAddress] = new BigNumber(farm.tokenPriceBusd).toNumber()
+      prices[tokenAddress] = new BigNumber(farm.token.busdPrice).toNumber()
     }
     /* eslint-enable no-param-reassign */
     return prices

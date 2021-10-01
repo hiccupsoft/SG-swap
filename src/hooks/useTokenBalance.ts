@@ -1,8 +1,6 @@
 import { useEffect, useState } from 'react'
-import { ethers } from 'ethers'
 import BigNumber from 'bignumber.js'
 import { useWeb3React } from '@web3-react/core'
-import tokens from 'config/constants/tokens'
 import { getBep20Contract, getCakeContract } from 'utils/contractHelpers'
 import { BIG_ZERO } from 'utils/bigNumber'
 import { simpleRpcProvider } from 'utils/providers'
@@ -88,7 +86,7 @@ export const useBurnedBalance = (tokenAddress: string) => {
 
 export const useGetBnbBalance = () => {
   const [fetchStatus, setFetchStatus] = useState(FetchStatus.NOT_FETCHED)
-  const [balance, setBalance] = useState(ethers.BigNumber.from(0))
+  const [balance, setBalance] = useState(BIG_ZERO)
   const { account } = useWeb3React()
   const { lastUpdated, setLastUpdated } = useLastUpdated()
 
@@ -96,7 +94,7 @@ export const useGetBnbBalance = () => {
     const fetchBalance = async () => {
       try {
         const walletBalance = await simpleRpcProvider.getBalance(account)
-        setBalance(walletBalance)
+        setBalance(new BigNumber(walletBalance.toString()))
         setFetchStatus(FetchStatus.SUCCESS)
       } catch {
         setFetchStatus(FetchStatus.FAILED)
@@ -109,13 +107,6 @@ export const useGetBnbBalance = () => {
   }, [account, lastUpdated, setBalance, setFetchStatus])
 
   return { balance, fetchStatus, refresh: setLastUpdated }
-}
-
-export const useGetCakeBalance = () => {
-  const { balance, fetchStatus } = useTokenBalance(tokens.cake.address)
-
-  // TODO: Remove ethers conversion once useTokenBalance is converted to ethers.BigNumber
-  return { balance: ethers.BigNumber.from(balance.toString()), fetchStatus }
 }
 
 export default useTokenBalance

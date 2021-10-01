@@ -4,14 +4,14 @@ import BigNumber from 'bignumber.js'
 import { Text, useMatchBreakpoints } from '@pancakeswap/uikit'
 import { useTranslation } from 'contexts/Localization'
 import { useCakeVault } from 'state/pools/hooks'
-import { DeserializedPool } from 'state/types'
+import { Pool } from 'state/types'
 import { BIG_ZERO } from 'utils/bigNumber'
 import { TokenPairImage } from 'components/TokenImage'
 import CakeVaultTokenPairImage from '../../CakeVaultCard/CakeVaultTokenPairImage'
 import BaseCell, { CellContent } from './BaseCell'
 
 interface NameCellProps {
-  pool: DeserializedPool
+  pool: Pool
 }
 
 const StyledCell = styled(BaseCell)`
@@ -47,11 +47,11 @@ const NameCell: React.FC<NameCellProps> = ({ pool }) => {
   const showSubtitle = sousId !== 0 || (sousId === 0 && !isMobile)
 
   if (isAutoVault) {
-    title = t('Auto CAKE')
+    title = t('Auto LOT')
     subtitle = t('Automatic restaking')
   } else if (isManualCakePool) {
-    title = t('Manual CAKE')
-    subtitle = `${t('Earn')} CAKE ${t('Stake').toLocaleLowerCase()} CAKE`
+    title = t('Manual LOT')
+    subtitle = `${t('Earn')} LOT ${t('Stake').toLocaleLowerCase()} LOT`
   }
 
   return (

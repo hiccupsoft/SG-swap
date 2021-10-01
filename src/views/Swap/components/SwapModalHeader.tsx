@@ -2,12 +2,11 @@ import React, { useMemo } from 'react'
 import { Trade, TradeType } from '@pancakeswap/sdk'
 import { Button, Text, ErrorIcon, ArrowDownIcon } from '@pancakeswap/uikit'
 import { Field } from 'state/swap/actions'
-import { useTranslation } from 'contexts/Localization'
+import { isAddress, shortenAddress } from 'utils'
 import { computeSlippageAdjustedAmounts, computeTradePriceBreakdown, warningSeverity } from 'utils/prices'
 import { AutoColumn } from 'components/Layout/Column'
 import { CurrencyLogo } from 'components/Logo'
 import { RowBetween, RowFixed } from 'components/Layout/Row'
-import truncateHash from 'utils/truncateHash'
 import { TruncatedText, SwapShowAcceptChanges } from './styleds'
 
 export default function SwapModalHeader({
@@ -23,41 +22,12 @@ export default function SwapModalHeader({
   showAcceptChanges: boolean
   onAcceptChanges: () => void
 }) {
-  const { t } = useTranslation()
   const slippageAdjustedAmounts = useMemo(
     () => computeSlippageAdjustedAmounts(trade, allowedSlippage),
     [trade, allowedSlippage],
   )
   const { priceImpactWithoutFee } = useMemo(() => computeTradePriceBreakdown(trade), [trade])
   const priceImpactSeverity = warningSeverity(priceImpactWithoutFee)
-
-  const amount =
-    trade.tradeType === TradeType.EXACT_INPUT
-      ? slippageAdjustedAmounts[Field.OUTPUT]?.toSignificant(6)
-      : slippageAdjustedAmounts[Field.INPUT]?.toSignificant(6)
-  const symbol =
-    trade.tradeType === TradeType.EXACT_INPUT ? trade.outputAmount.currency.symbol : trade.inputAmount.currency.symbol
-
-  const tradeInfoText =
-    trade.tradeType === TradeType.EXACT_INPUT
-      ? t('Output is estimated. You will receive at least %amount% %symbol% or the transaction will revert.', {
-          amount,
-          symbol,
-        })
-      : t('Input is estimated. You will sell at most %amount% %symbol% or the transaction will revert.', {
-          amount,
-          symbol,
-        })
-
-  const [estimatedText, transactionRevertText] = tradeInfoText.split(`${amount} ${symbol}`)
-
-  const truncatedRecipient = recipient ? truncateHash(recipient) : ''
-
-  const recipientInfoText = t('Output will be sent to %recipient%', {
-    recipient: truncatedRecipient,
-  })
-
-  const [recipientSentToText, postSentToText] = recipientInfoText.split(truncatedRecipient)
 
   return (
     <AutoColumn gap="md">
@@ -107,27 +77,36 @@ export default function SwapModalHeader({
           <RowBetween>
             <RowFixed>
               <ErrorIcon mr="8px" />
-              <Text bold> {t('Price Updated')}</Text>
+              <Text bold> Price Updated</Text>
             </RowFixed>
-            <Button onClick={onAcceptChanges}>{t('Accept')}</Button>
+            <Button onClick={onAcceptChanges}>Accept</Button>
           </RowBetween>
         </SwapShowAcceptChanges>
       ) : null}
       <AutoColumn justify="flex-start" gap="sm" style={{ padding: '24px 0 0 0px' }}>
-        <Text small color="textSubtle" textAlign="left" style={{ width: '100%' }}>
-          {estimatedText}
-          <b>
-            {amount} {symbol}
-          </b>
-          {transactionRevertText}
-        </Text>
+        {trade.tradeType === TradeType.EXACT_INPUT ? (
+          <Text small color="textSubtle" textAlign="left" style={{ width: '100%' }}>
+            {`Output is estimated. You will receive at least `}
+            <b>
+              {slippageAdjustedAmounts[Field.OUTPUT]?.toSignificant(6)} {trade.outputAmount.currency.symbol}
+            </b>
+            {' or the transaction will revert.'}
+          </Text>
+        ) : (
+          <Text small color="textSubtle" textAlign="left" style={{ width: '100%' }}>
+            {`Input is estimated. You will sell at most `}
+            <b>
+              {slippageAdjustedAmounts[Field.INPUT]?.toSignificant(6)} {trade.inputAmount.currency.symbol}
+            </b>
+            {' or the transaction will revert.'}
+          </Text>
+        )}
       </AutoColumn>
       {recipient !== null ? (
         <AutoColumn justify="flex-start" gap="sm" style={{ padding: '12px 0 0 0px' }}>
           <Text color="textSubtle">
-            {recipientSentToText}
-            <b title={recipient}>{truncatedRecipient}</b>
-            {postSentToText}
+            Output will be sent to{' '}
+            <b title={recipient}>{isAddress(recipient) ? shortenAddress(recipient) : recipient}</b>
           </Text>
         </AutoColumn>
       ) : null}

@@ -4,14 +4,13 @@ import { Box, Flex, Heading, Text, PrizeIcon, BlockIcon, LinkExternal, useToolti
 import styled from 'styled-components'
 import { useAppDispatch } from 'state'
 import { useTranslation } from 'contexts/Localization'
+import { usePriceBnbBusd } from 'state/farms/hooks'
 import { REWARD_RATE } from 'state/predictions/config'
 import { Bet, BetPosition } from 'state/types'
 import { fetchLedgerData, markAsCollected } from 'state/predictions'
 import { Result } from 'state/predictions/helpers'
 import { useGetIsClaimable } from 'state/predictions/hooks'
-import { useBNBBusdPrice } from 'hooks/useBUSDPrice'
 import { getBscScanLink } from 'utils'
-import { multiplyPriceByAmount } from 'utils/prices'
 import useIsRefundable from '../../hooks/useIsRefundable'
 import { formatBnb, getNetPayout } from './helpers'
 import CollectWinningsButton from '../CollectWinningsButton'
@@ -40,7 +39,7 @@ const BetResult: React.FC<BetResultProps> = ({ bet, result }) => {
   const { account } = useWeb3React()
   const { isRefundable } = useIsRefundable(bet.round.epoch)
   const canClaim = useGetIsClaimable(bet.round.epoch)
-  const bnbBusdPrice = useBNBBusdPrice()
+  const bnbBusdPrice = usePriceBnbBusd()
   const { targetRef, tooltip, tooltipVisible } = useTooltip(
     <Text as="p">{t('Includes your original position and your winnings, minus the %fee% fee.', { fee: '3%' })}</Text>,
     { placement: 'auto' },
@@ -50,7 +49,6 @@ const BetResult: React.FC<BetResultProps> = ({ bet, result }) => {
 
   // Winners get the payout, otherwise the claim what they put it if it was canceled
   const payout = isWinner ? getNetPayout(bet, REWARD_RATE) : bet.amount
-  const totalPayout = multiplyPriceByAmount(bnbBusdPrice, payout)
   const returned = payout + bet.amount
 
   const getHeaderColor = () => {
@@ -60,8 +58,6 @@ const BetResult: React.FC<BetResultProps> = ({ bet, result }) => {
       case Result.LOSE:
         return 'textSubtle'
       case Result.CANCELED:
-        return 'textDisabled'
-      case Result.HOUSE:
         return 'textDisabled'
       default:
         return 'text'
@@ -76,8 +72,6 @@ const BetResult: React.FC<BetResultProps> = ({ bet, result }) => {
         return t('Lose')
       case Result.CANCELED:
         return t('Canceled')
-      case Result.HOUSE:
-        return t('To Burn')
       default:
         return ''
     }
@@ -102,7 +96,6 @@ const BetResult: React.FC<BetResultProps> = ({ bet, result }) => {
       case Result.LOSE:
         return 'failure'
       case Result.CANCELED:
-      case Result.HOUSE:
       default:
         return 'text'
     }
@@ -156,7 +149,7 @@ const BetResult: React.FC<BetResultProps> = ({ bet, result }) => {
           <Box style={{ textAlign: 'right' }}>
             <Text bold color={getResultColor()}>{`${isWinner ? '+' : '-'}${formatBnb(payout)} BNB`}</Text>
             <Text fontSize="12px" color="textSubtle">
-              {`~$${totalPayout.toFixed(2)}`}
+              {`~$${formatBnb(bnbBusdPrice.times(payout).toNumber())}`}
             </Text>
           </Box>
         </Flex>

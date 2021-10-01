@@ -15,7 +15,6 @@ interface MultiplierArrowProps {
   betPosition?: BetPosition
   isDisabled?: boolean
   isActive?: boolean
-  isHouse?: boolean
 }
 
 const ArrowWrapper = styled.div`
@@ -43,8 +42,8 @@ const EnteredTagWrapper = styled.div`
 
 const getTextColor =
   (fallback = 'textSubtle') =>
-  (isActive: boolean, isDisabled: boolean, isHouse: boolean) => {
-    if (isDisabled || isHouse) {
+  (isActive: boolean, isDisabled: boolean) => {
+    if (isDisabled) {
       return 'textDisabled'
     }
 
@@ -63,12 +62,11 @@ const MultiplierArrow: React.FC<MultiplierArrowProps> = ({
   betPosition = BetPosition.BULL,
   isDisabled = false,
   isActive = false,
-  isHouse = false,
 }) => {
   const { t } = useTranslation()
-  const upColor = getTextColor('success')(isActive, isDisabled, isHouse)
-  const downColor = getTextColor('failure')(isActive, isDisabled, isHouse)
-  const textColor = getTextColor()(isActive, isDisabled, isHouse)
+  const upColor = getTextColor('success')(isActive, isDisabled)
+  const downColor = getTextColor('failure')(isActive, isDisabled)
+  const textColor = getTextColor()(isActive, isDisabled)
   const multiplierText = (
     <Box>
       <Flex justifyContent="center" height="14px">

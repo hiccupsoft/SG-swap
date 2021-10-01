@@ -201,13 +201,6 @@ const campaigns: Campaign[] = [
     description: 'Top 100 ticket buyer in the early days of Lottery V2',
     badge: 'baller.svg',
   },
-  {
-    id: '516010001',
-    type: 'participation',
-    title: '1 Year',
-    description: 'Joined PancakeSwap during the first year of our journey!',
-    badge: '1-year.svg',
-  },
 ]
 
 /**

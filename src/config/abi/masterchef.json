@@ -162,7 +162,7 @@
   },
   {
     "inputs": [],
-    "name": "cake",
+    "name": "LOT",
     "outputs": [
       {
         "internalType": "contract CakeToken",

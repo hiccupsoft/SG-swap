@@ -13,8 +13,10 @@ import {
   Box,
 } from '@pancakeswap/uikit'
 import styled from 'styled-components'
+import usePersistState from 'hooks/usePersistState'
 import { useTranslation } from 'contexts/Localization'
-import { useUserPredictionChartDisclaimerShow } from 'state/user/hooks'
+
+export const CHART_LOCAL_STORAGE_KEY = 'pcs_chart_do_not_show'
 
 const Ul = styled.ul`
   color: ${({ theme }) => theme.colors.textSubtle};
@@ -28,7 +30,7 @@ const Ul = styled.ul`
 `
 
 const ChartDisclaimer: React.FC<InjectedModalProps> = ({ onDismiss }) => {
-  const [showDisclaimer, setShowDisclaimer] = useUserPredictionChartDisclaimerShow()
+  const [doNotShow, setDoNowShow] = usePersistState(false, { localStorageKey: CHART_LOCAL_STORAGE_KEY })
   const { t } = useTranslation()
 
   const handleConfirm = () => {
@@ -72,12 +74,7 @@ const ChartDisclaimer: React.FC<InjectedModalProps> = ({ onDismiss }) => {
         <label htmlFor="checkbox" style={{ display: 'block', cursor: 'pointer', marginBottom: '24px' }}>
           <Flex alignItems="center">
             <div style={{ flex: 'none' }}>
-              <Checkbox
-                id="checkbox"
-                scale="sm"
-                checked={!showDisclaimer}
-                onChange={() => setShowDisclaimer(!showDisclaimer)}
-              />
+              <Checkbox id="checkbox" scale="sm" checked={doNotShow} onChange={() => setDoNowShow(!doNotShow)} />
             </div>
             <Text ml="8px">{t("Don't show this again")}</Text>
           </Flex>

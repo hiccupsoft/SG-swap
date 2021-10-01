@@ -61,7 +61,7 @@ const TopTradersCard: React.FC<TeamRanksProps> = ({
   ])
 
   return (
-    <Card id="top-traders-card">
+    <Card>
       <Box width="100%">
         <CardHeader>
           <Heading color="secondary" scale="lg">

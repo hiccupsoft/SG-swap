@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import { useWeb3React } from '@web3-react/core'
 import { ethers, Contract } from 'ethers'
+import BigNumber from 'bignumber.js'
 import { useAppDispatch } from 'state'
 import { updateUserAllowance } from 'state/actions'
 import { useTranslation } from 'contexts/Localization'
@@ -99,7 +100,8 @@ export const useCheckVaultApprovalStatus = () => {
   useEffect(() => {
     const checkApprovalStatus = async () => {
       try {
-        const currentAllowance = await cakeContract.allowance(account, cakeVaultContract.address)
+        const response = await cakeContract.allowance(account, cakeVaultContract.address)
+        const currentAllowance = new BigNumber(response.toString())
         setIsVaultApproved(currentAllowance.gt(0))
       } catch (error) {
         setIsVaultApproved(false)

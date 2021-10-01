@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react'
-import { Flex, Text, Skeleton, Button, ArrowForwardIcon } from '@pancakeswap/uikit'
-import { Link } from 'react-router-dom'
+import { Flex, Text, Skeleton, Link, Button, ArrowForwardIcon } from '@pancakeswap/uikit'
 import { useTranslation } from 'contexts/Localization'
 import useRefresh from 'hooks/useRefresh'
 import useIntersectionObserver from 'hooks/useIntersectionObserver'
@@ -71,6 +70,7 @@ const LotteryCardContent = () => {
   return (
     <>
       <Flex flexDirection="column" mt="48px">
+        <div ref={observerRef} />
         <Text color="white" bold fontSize="16px">
           {t('Lottery')}
         </Text>
@@ -101,7 +101,7 @@ const LotteryCardContent = () => {
         </Text>
       </Flex>
       <Flex alignItems="center" justifyContent="center">
-        <StyledLink to="/lottery" id="homepage-prediction-cta">
+        <StyledLink href="/lottery" id="homepage-prediction-cta">
           <Button width="100%">
             <Text bold color="invertedContrast">
               {t('Buy Tickets')}

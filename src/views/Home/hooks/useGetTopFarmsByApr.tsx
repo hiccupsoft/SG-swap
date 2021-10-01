@@ -4,9 +4,10 @@ import { useFarms, usePriceCakeBusd } from 'state/farms/hooks'
 import { useAppDispatch } from 'state'
 import { fetchFarmsPublicDataAsync, nonArchivedFarms } from 'state/farms'
 import { getFarmApr } from 'utils/apr'
+import BigNumber from 'bignumber.js'
 import { orderBy } from 'lodash'
 import { FarmWithStakedValue } from 'views/Farms/components/FarmCard/FarmCard'
-import { DeserializedFarm } from 'state/types'
+import { Farm } from 'state/types'
 
 enum FetchStatus {
   NOT_FETCHED = 'not-fetched',
@@ -25,7 +26,7 @@ const useGetTopFarmsByApr = (isIntersecting: boolean) => {
   useEffect(() => {
     const fetchFarmData = async () => {
       setFetchStatus(FetchStatus.FETCHING)
-      const activeFarms = nonArchivedFarms.filter((farm) => farm.pid !== 0)
+      const activeFarms = nonArchivedFarms.filter((farm) => farm.pid !== 0 && farm.multiplier !== '0X')
       try {
         await dispatch(fetchFarmsPublicDataAsync(activeFarms.map((farm) => farm.pid)))
         setFetchStatus(FetchStatus.SUCCESS)
@@ -41,19 +42,12 @@ const useGetTopFarmsByApr = (isIntersecting: boolean) => {
   }, [dispatch, setFetchStatus, fetchStatus, topFarms, isIntersecting])
 
   useEffect(() => {
-    const getTopFarmsByApr = (farmsState: DeserializedFarm[]) => {
-      const farmsWithPrices = farmsState.filter(
-        (farm) =>
-          farm.lpTotalInQuoteToken &&
-          farm.quoteTokenPriceBusd &&
-          farm.pid !== 0 &&
-          farm.multiplier &&
-          farm.multiplier !== '0X',
-      )
+    const getTopFarmsByApr = (farmsState: Farm[]) => {
+      const farmsWithPrices = farmsState.filter((farm) => farm.lpTotalInQuoteToken && farm.quoteToken.busdPrice)
       const farmsWithApr: FarmWithStakedValue[] = farmsWithPrices.map((farm) => {
-        const totalLiquidity = farm.lpTotalInQuoteToken.times(farm.quoteTokenPriceBusd)
+        const totalLiquidity = new BigNumber(farm.lpTotalInQuoteToken).times(farm.quoteToken.busdPrice)
         const { cakeRewardsApr, lpRewardsApr } = getFarmApr(
-          farm.poolWeight,
+          new BigNumber(farm.poolWeight),
           cakePriceBusd,
           totalLiquidity,
           farm.lpAddresses[ChainId.MAINNET],

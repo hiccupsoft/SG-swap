@@ -2,6 +2,7 @@ import React, { useEffect } from 'react'
 import styled from 'styled-components'
 import { ModalBody, ModalContainer, Message, ModalHeader, Box, Heading } from '@pancakeswap/uikit'
 import useTheme from 'hooks/useTheme'
+import { getAddress } from 'utils/addressHelpers'
 import { useTranslation } from 'contexts/Localization'
 import { WrappedTokenInfo } from 'state/lists/hooks'
 import SwapWarningTokensConfig from 'config/constants/swapWarningTokens'
@@ -50,11 +51,11 @@ const SwapWarningModal: React.FC<SwapWarningModalProps> = ({ swapCurrency, onDis
   usePreventModalOverlayClick()
 
   const TOKEN_WARNINGS = {
-    [SwapWarningTokensConfig.safemoon.address]: {
+    [getAddress(SwapWarningTokensConfig.safemoon.address)]: {
       symbol: SwapWarningTokensConfig.safemoon.symbol,
       component: <SafemoonWarning />,
     },
-    [SwapWarningTokensConfig.bondly.address]: {
+    [getAddress(SwapWarningTokensConfig.bondly.address)]: {
       symbol: SwapWarningTokensConfig.bondly.symbol,
       component: <BondlyWarning />,
     },

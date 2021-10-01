@@ -6,7 +6,6 @@ import { wrappedCurrency } from 'utils/wrappedCurrency'
 import { usePair } from 'hooks/usePairs'
 import useTotalSupply from 'hooks/useTotalSupply'
 
-import { useTranslation } from 'contexts/Localization'
 import { AppDispatch, AppState } from '../index'
 import { tryParseAmount } from '../swap/hooks'
 import { useTokenBalances } from '../wallet/hooks'
@@ -32,8 +31,6 @@ export function useDerivedBurnInfo(
   const { account, chainId } = useActiveWeb3React()
 
   const { independentField, typedValue } = useBurnState()
-
-  const { t } = useTranslation()
 
   // pair + totalsupply
   const [, pair] = usePair(currencyA, currencyB)
@@ -120,11 +117,11 @@ export function useDerivedBurnInfo(
 
   let error: string | undefined
   if (!account) {
-    error = t('Connect Wallet')
+    error = 'Connect Wallet'
   }
 
   if (!parsedAmounts[Field.LIQUIDITY] || !parsedAmounts[Field.CURRENCY_A] || !parsedAmounts[Field.CURRENCY_B]) {
-    error = error ?? t('Enter an amount')
+    error = error ?? 'Enter an amount'
   }
 
   return { pair, parsedAmounts, error }

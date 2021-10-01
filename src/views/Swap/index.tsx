@@ -7,6 +7,7 @@ import UnsupportedCurrencyFooter from 'components/UnsupportedCurrencyFooter'
 import { RouteComponentProps } from 'react-router-dom'
 import { useTranslation } from 'contexts/Localization'
 import SwapWarningTokens from 'config/constants/swapWarningTokens'
+import { getAddress } from 'utils/addressHelpers'
 import AddressInputPanel from './components/AddressInputPanel'
 import { GreyCard } from '../../components/Card'
 import Column, { AutoColumn } from '../../components/Layout/Column'
@@ -168,7 +169,7 @@ export default function Swap({ history }: RouteComponentProps) {
   const [singleHopOnly] = useUserSingleHopOnly()
 
   const handleSwap = useCallback(() => {
-    if (priceImpactWithoutFee && !confirmPriceImpactWithoutFee(priceImpactWithoutFee, t)) {
+    if (priceImpactWithoutFee && !confirmPriceImpactWithoutFee(priceImpactWithoutFee)) {
       return
     }
     if (!swapCallback) {
@@ -187,7 +188,7 @@ export default function Swap({ history }: RouteComponentProps) {
           txHash: undefined,
         })
       })
-  }, [priceImpactWithoutFee, swapCallback, tradeToConfirm, t])
+  }, [priceImpactWithoutFee, swapCallback, tradeToConfirm])
 
   // errors
   const [showInverted, setShowInverted] = useState<boolean>(false)
@@ -223,7 +224,8 @@ export default function Swap({ history }: RouteComponentProps) {
   const shouldShowSwapWarning = (swapCurrency) => {
     const isWarningToken = Object.entries(SwapWarningTokens).find((warningTokenConfig) => {
       const warningTokenData = warningTokenConfig[1]
-      return swapCurrency.address === warningTokenData.address
+      const warningTokenAddress = getAddress(warningTokenData.address)
+      return swapCurrency.address === warningTokenAddress
     })
     return Boolean(isWarningToken)
   }
@@ -475,7 +477,7 @@ export default function Swap({ history }: RouteComponentProps) {
               >
                 {swapInputError ||
                   (priceImpactSeverity > 3 && !isExpertMode
-                    ? t('Price Impact Too High')
+                    ? `Price Impact Too High`
                     : priceImpactSeverity > 2
                     ? t('Swap Anyway')
                     : t('Swap'))}

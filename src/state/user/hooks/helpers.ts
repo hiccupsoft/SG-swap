@@ -1,6 +1,6 @@
 import { Token } from '@pancakeswap/sdk'
-import { SerializedToken } from 'config/constants/types'
 import { parseUnits } from 'ethers/lib/utils'
+import { SerializedToken } from '../actions'
 
 export function serializeToken(token: Token): SerializedToken {
   return {
@@ -9,7 +9,6 @@ export function serializeToken(token: Token): SerializedToken {
     decimals: token.decimals,
     symbol: token.symbol,
     name: token.name,
-    projectLink: token.projectLink,
   }
 }
 
@@ -20,7 +19,6 @@ export function deserializeToken(serializedToken: SerializedToken): Token {
     serializedToken.decimals,
     serializedToken.symbol,
     serializedToken.name,
-    serializedToken.projectLink,
   )
 }
 

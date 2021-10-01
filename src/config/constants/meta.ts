@@ -9,45 +9,10 @@ export const DEFAULT_META: PageMeta = {
 }
 
 export const getCustomMeta = (path: string, t: ContextApi['t']): PageMeta => {
-  let basePath
-  if (path.startsWith('/swap')) {
-    basePath = '/swap'
-  } else if (path.startsWith('/add')) {
-    basePath = '/add'
-  } else if (path.startsWith('/remove')) {
-    basePath = '/remove'
-  } else if (path.startsWith('/teams')) {
-    basePath = '/teams'
-  } else if (path.startsWith('/voting/proposal') && path !== '/voting/proposal/create') {
-    basePath = '/voting/proposal'
-  } else {
-    basePath = path
-  }
-
-  switch (basePath) {
+  switch (path) {
     case '/':
       return {
         title: `${t('Home')} | ${t('PancakeSwap')}`,
-      }
-    case '/swap':
-      return {
-        title: `${t('Exchange')} | ${t('PancakeSwap')}`,
-      }
-    case '/add':
-      return {
-        title: `${t('Add Liquidity')} | ${t('PancakeSwap')}`,
-      }
-    case '/remove':
-      return {
-        title: `${t('Remove Liquidity')} | ${t('PancakeSwap')}`,
-      }
-    case '/liquidity':
-      return {
-        title: `${t('Liquidity')} | ${t('PancakeSwap')}`,
-      }
-    case '/find':
-      return {
-        title: `${t('Import Pool')} | ${t('PancakeSwap')}`,
       }
     case '/competition':
       return {
@@ -57,17 +22,9 @@ export const getCustomMeta = (path: string, t: ContextApi['t']): PageMeta => {
       return {
         title: `${t('Prediction')} | ${t('PancakeSwap')}`,
       }
-    case '/prediction/leaderboard':
-      return {
-        title: `${t('Leaderboard')} | ${t('PancakeSwap')}`,
-      }
     case '/farms':
       return {
         title: `${t('Farms')} | ${t('PancakeSwap')}`,
-      }
-    case '/farms/auction':
-      return {
-        title: `${t('Farm Auctions')} | ${t('PancakeSwap')}`,
       }
     case '/pools':
       return {
@@ -77,6 +34,10 @@ export const getCustomMeta = (path: string, t: ContextApi['t']): PageMeta => {
       return {
         title: `${t('Lottery')} | ${t('PancakeSwap')}`,
       }
+    case '/collectibles':
+      return {
+        title: `${t('Collectibles')} | ${t('PancakeSwap')}`,
+      }
     case '/ifo':
       return {
         title: `${t('Initial Farm Offering')} | ${t('PancakeSwap')}`,
@@ -85,34 +46,11 @@ export const getCustomMeta = (path: string, t: ContextApi['t']): PageMeta => {
       return {
         title: `${t('Leaderboard')} | ${t('PancakeSwap')}`,
       }
-    case '/voting':
+    case '/profile/tasks':
       return {
-        title: `${t('Voting')} | ${t('PancakeSwap')}`,
+        title: `${t('Task Center')} | ${t('PancakeSwap')}`,
       }
-    case '/voting/proposal':
-      return {
-        title: `${t('Proposals')} | ${t('PancakeSwap')}`,
-      }
-    case '/voting/proposal/create':
-      return {
-        title: `${t('Make a Proposal')} | ${t('PancakeSwap')}`,
-      }
-    case '/info':
-      return {
-        title: `${t('Overview')} | ${t('PancakeSwap Info & Analytics')}`,
-        description: 'View statistics for Pancakeswap exchanges.',
-      }
-    case '/info/pools':
-      return {
-        title: `${t('Pools')} | ${t('PancakeSwap Info & Analytics')}`,
-        description: 'View statistics for Pancakeswap exchanges.',
-      }
-    case '/info/tokens':
-      return {
-        title: `${t('Pools')} | ${t('PancakeSwap Info & Analytics')}`,
-        description: 'View statistics for Pancakeswap exchanges.',
-      }
-    case '/nfts/profile':
+    case '/profile':
       return {
         title: `${t('Your Profile')} | ${t('PancakeSwap')}`,
       }

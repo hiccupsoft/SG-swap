@@ -13,19 +13,9 @@ import {
   PredictionStatus,
   ReduxNodeRound,
   BetPosition,
-  LeaderboardLoadingState,
-  PredictionUser,
-  LeaderboardFilter,
-  State,
 } from 'state/types'
 import { getPredictionsContract } from 'utils/contractHelpers'
-import {
-  FUTURE_ROUND_COUNT,
-  LEADERBOARD_MIN_ROUNDS_PLAYED,
-  PAST_ROUND_COUNT,
-  ROUNDS_PER_PAGE,
-  ROUND_BUFFER,
-} from './config'
+import { FUTURE_ROUND_COUNT, PAST_ROUND_COUNT, ROUND_BUFFER } from './config'
 import {
   getBetHistory,
   transformBetResponse,
@@ -38,12 +28,7 @@ import {
   makeLedgerData,
   serializePredictionsRoundsResponse,
   getClaimStatuses,
-  fetchUsersRoundsLength,
-  fetchUserRounds,
-  getPredictionUsers,
-  transformUserResponse,
-  LEADERBOARD_RESULTS_PER_PAGE,
-  getPredictionUser,
+  fetchLatestUserRounds,
 } from './helpers'
 
 const initialState: PredictionsState = {
@@ -59,25 +44,9 @@ const initialState: PredictionsState = {
   bufferSeconds: 60,
   lastOraclePrice: BIG_ZERO.toJSON(),
   rounds: {},
-  history: [],
-  totalHistory: 0,
-  currentHistoryPage: 1,
-  hasHistoryLoaded: false,
+  history: {},
   ledgers: {},
   claimableStatuses: {},
-  leaderboard: {
-    selectedAddress: null,
-    loadingState: LeaderboardLoadingState.INITIAL,
-    filters: {
-      address: null,
-      orderBy: 'netBNB',
-      timePeriod: 'all',
-    },
-    skip: 0,
-    hasMoreResults: true,
-    addressResults: {},
-    results: [],
-  },
 }
 
 // Thunks
@@ -197,34 +166,13 @@ export const fetchHistory = createAsyncThunk<{ account: string; bets: Bet[] }, {
 )
 
 export const fetchNodeHistory = createAsyncThunk<
-  { bets: Bet[]; claimableStatuses: PredictionsState['claimableStatuses']; page?: number; totalHistory: number },
-  { account: string; page?: number }
->('predictions/fetchNodeHistory', async ({ account, page = 1 }) => {
-  const userRoundsLength = await fetchUsersRoundsLength(account)
-  const emptyResult = { bets: [], claimableStatuses: {}, totalHistory: userRoundsLength.toNumber() }
-  const maxPages = userRoundsLength.lte(ROUNDS_PER_PAGE) ? 1 : Math.ceil(userRoundsLength.toNumber() / ROUNDS_PER_PAGE)
-
-  if (userRoundsLength.eq(0)) {
-    return emptyResult
-  }
-
-  if (page > maxPages) {
-    return emptyResult
-  }
-
-  const cursor = userRoundsLength.sub(ROUNDS_PER_PAGE * page)
-
-  // If the page request is the final one we only want to retrieve the amount of rounds up to the next cursor.
-  const size =
-    maxPages === page
-      ? userRoundsLength
-          .sub(ROUNDS_PER_PAGE * (page - 1)) // Previous page's cursor
-          .toNumber()
-      : ROUNDS_PER_PAGE
-  const userRounds = await fetchUserRounds(account, cursor.lt(0) ? 0 : cursor.toNumber(), size)
+  { account: string; bets: Bet[]; claimableStatuses: PredictionsState['claimableStatuses'] },
+  string
+>('predictions/fetchNodeHistory', async (account) => {
+  const userRounds = await fetchLatestUserRounds(account)
 
   if (!userRounds) {
-    return emptyResult
+    return { account, bets: [], claimableStatuses: {} }
   }
 
   const epochs = Object.keys(userRounds).map((epochStr) => Number(epochStr))
@@ -242,10 +190,6 @@ export const fetchNodeHistory = createAsyncThunk<
     const getRoundPosition = () => {
       if (!closePrice) {
         return null
-      }
-
-      if (round.closePrice.eq(round.lockPrice)) {
-        return BetPosition.HOUSE
       }
 
       return round.closePrice.gt(round.lockPrice) ? BetPosition.BULL : BetPosition.BEAR
@@ -295,66 +239,13 @@ export const fetchNodeHistory = createAsyncThunk<
     ]
   }, [])
 
-  return { bets, claimableStatuses, page, totalHistory: userRoundsLength.toNumber() }
-})
-
-// Leaderboard
-export const filterLeaderboard = createAsyncThunk<{ results: PredictionUser[] }, { filters: LeaderboardFilter }>(
-  'predictions/filterLeaderboard',
-  async ({ filters }) => {
-    const usersResponse = await getPredictionUsers({
-      skip: 0,
-      orderBy: filters.orderBy,
-      where: { totalBets_gte: LEADERBOARD_MIN_ROUNDS_PLAYED, [`${filters.orderBy}_gt`]: 0 },
-    })
-
-    return { results: usersResponse.map(transformUserResponse) }
-  },
-)
-
-export const fetchAddressResult = createAsyncThunk<
-  { account: string; data: PredictionUser },
-  string,
-  { rejectValue: string }
->('predictions/fetchAddressResult', async (account, { rejectWithValue }) => {
-  const userResponse = await getPredictionUser(account)
-
-  if (!userResponse) {
-    return rejectWithValue(account)
-  }
-
-  return { account, data: transformUserResponse(userResponse) }
-})
-
-export const filterNextPageLeaderboard = createAsyncThunk<
-  { results: PredictionUser[]; skip: number },
-  number,
-  { state: State }
->('predictions/filterNextPageLeaderboard', async (skip, { getState }) => {
-  const state = getState()
-  const usersResponse = await getPredictionUsers({
-    skip,
-    orderBy: state.predictions.leaderboard.filters.orderBy,
-    where: { totalBets_gte: LEADERBOARD_MIN_ROUNDS_PLAYED, [`${state.predictions.leaderboard.filters.orderBy}_gt`]: 0 },
-  })
-
-  return { results: usersResponse.map(transformUserResponse), skip }
+  return { account, bets, claimableStatuses }
 })
 
 export const predictionsSlice = createSlice({
   name: 'predictions',
   initialState,
   reducers: {
-    setLeaderboardFilter: (state, action: PayloadAction<Partial<LeaderboardFilter>>) => {
-      state.leaderboard.filters = {
-        ...state.leaderboard.filters,
-        ...action.payload,
-      }
-
-      // Anytime we filters change we need to reset back to page 1
-      state.leaderboard.skip = 0
-      state.leaderboard.hasMoreResults = true
-    },
     setPredictionStatus: (state, action: PayloadAction<PredictionStatus>) => {
       state.status = action.payload
     },
@@ -377,70 +268,8 @@ export const predictionsSlice = createSlice({
     markAsCollected: (state, action: PayloadAction<{ [key: string]: boolean }>) => {
       state.claimableStatuses = { ...state.claimableStatuses, ...action.payload }
     },
-    setSelectedAddress: (state, action: PayloadAction<string>) => {
-      state.leaderboard.selectedAddress = action.payload
-    },
   },
   extraReducers: (builder) => {
-    // Leaderboard filter
-    builder.addCase(filterLeaderboard.pending, (state) => {
-      // Only mark as loading if we come from IDLE. This allows initialization.
-      if (state.leaderboard.loadingState === LeaderboardLoadingState.IDLE) {
-        state.leaderboard.loadingState = LeaderboardLoadingState.LOADING
-      }
-    })
-    builder.addCase(filterLeaderboard.fulfilled, (state, action) => {
-      const { results } = action.payload
-
-      state.leaderboard.loadingState = LeaderboardLoadingState.IDLE
-      state.leaderboard.results = results
-
-      if (results.length < LEADERBOARD_RESULTS_PER_PAGE) {
-        state.leaderboard.hasMoreResults = false
-      }
-
-      // Populate address results to reduce calls
-      state.leaderboard.addressResults = {
-        ...state.leaderboard.addressResults,
-        ...results.reduce((accum, result) => {
-          return {
-            ...accum,
-            [result.id]: result,
-          }
-        }, {}),
-      }
-    })
-
-    // Leaderboard account result
-    builder.addCase(fetchAddressResult.pending, (state) => {
-      state.leaderboard.loadingState = LeaderboardLoadingState.LOADING
-    })
-    builder.addCase(fetchAddressResult.fulfilled, (state, action) => {
-      const { account, data } = action.payload
-      state.leaderboard.loadingState = LeaderboardLoadingState.IDLE
-      state.leaderboard.addressResults[account] = data
-    })
-    builder.addCase(fetchAddressResult.rejected, (state, action) => {
-      state.leaderboard.loadingState = LeaderboardLoadingState.IDLE
-      state.leaderboard.addressResults[action.payload] = null
-    })
-
-    // Leaderboard next page
-    builder.addCase(filterNextPageLeaderboard.pending, (state) => {
-      state.leaderboard.loadingState = LeaderboardLoadingState.LOADING
-    })
-    builder.addCase(filterNextPageLeaderboard.fulfilled, (state, action) => {
-      const { results, skip } = action.payload
-
-      state.leaderboard.loadingState = LeaderboardLoadingState.IDLE
-      state.leaderboard.results = [...state.leaderboard.results, ...results]
-      state.leaderboard.skip = skip
-
-      if (results.length < LEADERBOARD_RESULTS_PER_PAGE) {
-        state.leaderboard.hasMoreResults = false
-      }
-    })
-
     // Claimable statuses
     builder.addCase(fetchClaimableStatuses.fulfilled, (state, action) => {
       state.claimableStatuses = merge({}, state.claimableStatuses, action.payload)
@@ -529,14 +358,10 @@ export const predictionsSlice = createSlice({
       state.isFetchingHistory = false
     })
     builder.addCase(fetchNodeHistory.fulfilled, (state, action) => {
-      const { bets, claimableStatuses, page, totalHistory } = action.payload
-
+      const { account, bets, claimableStatuses } = action.payload
       state.isFetchingHistory = false
-      state.history = page === 1 ? bets : [...state.history, ...bets]
+      state.history[account] = bets
       state.claimableStatuses = { ...state.claimableStatuses, ...claimableStatuses }
-      state.hasHistoryLoaded = state.history.length === totalHistory || bets.length === 0
-      state.totalHistory = totalHistory
-      state.currentHistoryPage = page
     })
   },
 })
@@ -550,8 +375,6 @@ export const {
   setPredictionStatus,
   setLastOraclePrice,
   markAsCollected,
-  setLeaderboardFilter,
-  setSelectedAddress,
 } = predictionsSlice.actions
 
 export default predictionsSlice.reducer

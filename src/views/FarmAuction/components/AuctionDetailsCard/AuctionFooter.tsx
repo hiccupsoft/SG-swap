@@ -3,6 +3,7 @@ import styled from 'styled-components'
 import { Text, Flex, Box, CardFooter, ExpandableLabel } from '@pancakeswap/uikit'
 import { useTranslation } from 'contexts/Localization'
 import { Auction, AuctionStatus } from 'config/constants/types'
+import { FarmSchedule } from './AuctionSchedule'
 import WhitelistedBiddersButton from '../WhitelistedBiddersButton'
 
 const FooterInner = styled(Box)`
@@ -37,6 +38,7 @@ const AuctionFooter: React.FC<{ auction: Auction }> = ({ auction }) => {
               <Text color="textSubtle">{t('Total whitelisted bidders')}</Text>
               <WhitelistedBiddersButton />
             </Flex>
+            <FarmSchedule auction={auction} />
           </Flex>
         </FooterInner>
       )}
